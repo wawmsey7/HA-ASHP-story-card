@@ -1,0 +1,573 @@
+# Grant Aerona 290 HP290 - Full REST sensor integration for Home Assistant
+# Device IP: http://HUB_IP/
+# Sources: OpenEnergyMonitor community + full JSON API analysis (March 2026)
+# Endpoints used: /econet/editParams and /econet/regParams
+#
+# IMPORTANT - unique_id rules:
+#   Never change a unique_id once HA has used it — all historical data is keyed to it.
+#   You can freely change 'name:' for display without losing history.
+#
+# To reload after changes (no full HA restart needed):
+#   Developer Tools → YAML → Reload REST entities
+#
+# CHANGELOG v3 (bug fixes from full JSON audit):
+#   FIXED BUG: Legionella Temp — data['136'] is Mixer6valveopeningtime (120s), NOT
+#              a temperature. Sensor removed pending correct param identification.
+#              To find it: open /econet/editParams in Firefox and search for a value
+#              around 60-65°C. Once found, add it back using the same pattern.
+#   FIXED BUG: Session energy tile indices were wrong by 1 — tile[72] is the running
+#              total (~19,839 Wh), tile[73]=0.3kWh (session elec), tile[74]=3.8kWh
+#              (session thermal). Now corrected.
+#   FIXED BUG: Session energy state_class was total_increasing — wrong, as session
+#              values reset after each run. Changed to measurement.
+#   FIXED BUG: device_class: temperature removed from differential/offset sensors
+#              (DHW Hysteresis, Circuit 1 Hysteresis, Circuit 1 Temp Reduction,
+#              Room Temp Correction) — these are deltas, not absolute temperatures.
+
+# ============================================================
+# ENDPOINT 1: editParams — temperatures, performance, settings
+# ============================================================
+
+- authentication: basic
+  username: !secret econet_username
+  password: !secret econet_password
+  scan_interval: 30
+  resource: http://HUB_IP/econet/editParams
+  sensor:
+    # --- Performance ---
+
+    - name: "Heat Pump COP"
+      unique_id: "grant_cop"
+      value_template: "{{ value_json['informationParams']['221'][1][0][0] }}"
+      state_class: measurement
+      # Self-reported by controller — treat as indicative, not metered
+      # Verified in JSON: currently 12.47 (mild day, low load — plausible)
+
+    - name: "Heat Pump SCOP"
+      unique_id: "grant_scop"
+      value_template: "{{ value_json['informationParams']['222'][1][0][0] }}"
+      state_class: measurement
+      # Verified in JSON: currently 7.65
+
+    - name: "Heat Pump Electrical Power"
+      unique_id: "grant_electrical_power"
+      value_template: "{{ value_json['informationParams']['211'][1][0][0] }}"
+      unit_of_measurement: "kW"
+      device_class: power
+      state_class: measurement
+      # Self-reported — cross-check with Shelly EM clamp meter for accuracy
+      # Verified in JSON: currently 0.34 kW
+
+    - name: "Heat Pump Thermal Power"
+      unique_id: "grant_thermal_power"
+      value_template: "{{ value_json['informationParams']['212'][1][0][0] }}"
+      unit_of_measurement: "kW"
+      device_class: power
+      state_class: measurement
+      # Verified in JSON: currently 3.69 kW
+
+    - name: "Compressor Frequency"
+      unique_id: "grant_compressor_freq"
+      value_template: "{{ value_json['informationParams']['21'][1][0][0] }}"
+      unit_of_measurement: "Hz"
+      device_class: frequency
+      state_class: measurement
+      # Verified in JSON: currently 15 Hz
+
+    - name: "Fan Speed"
+      unique_id: "grant_fan_speed"
+      value_template: "{{ value_json['informationParams']['22'][1][0][0] }}"
+      unit_of_measurement: "rpm"
+      state_class: measurement
+      # Verified in JSON: currently 450 rpm (silent mode level 1 active)
+
+    - name: "Flow Rate Raw"
+      unique_id: "grant_flow_rate"
+      value_template: "{{ value_json['data']['1211']['value'] | round(1) }}"
+      unit_of_measurement: "L/min"
+      state_class: measurement
+      # AXENREGISTER64 — verified in JSON: 16.67 l/min
+      # Prefer the 'Flow Rate' sensor in endpoint 2 (grant_flow_rate_clean) for
+      # automations — it reads curr.currentFlow which is more direct (18.33 l/min)
+
+    - name: "Heating Energy Total"
+      unique_id: "grant_heating_energy"
+      value_template: "{{ (value_json['informationParams']['203'][1][0][0] | float / 1000) | round(2) }}"
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: total_increasing
+      # Verified in JSON: 19,839 Wh = 19.84 kWh cumulative since last power cycle.
+      # HA handles resets gracefully for total_increasing.
+
+    - name: "DHW Heating Energy Total"
+      unique_id: "grant_dhw_heating_energy"
+      value_template: "{{ (value_json['informationParams']['204'][1][0][0] | float / 1000) | round(2) }}"
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: total_increasing
+      # Verified in JSON: 19,839 Wh = 19.84 kWh cumulative since last power cycle.
+
+    # --- Temperatures ---
+    - name: "Actual Flow Temp"
+      unique_id: "grant_actual_flow_temp"
+      value_template: "{{ value_json['informationParams']['14'][1][0][0] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 30.4°C
+
+    - name: "Actual Return Temp"
+      unique_id: "grant_actual_return_temp"
+      value_template: "{{ value_json['informationParams']['15'][1][0][0] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 27.4°C
+
+    - name: "Target Flow Temp"
+      unique_id: "grant_target_flow_temp"
+      value_template: "{{ value_json['informationParams']['12'][1][0][0] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 30°C
+
+    - name: "C1 Desired Heating LWT"
+      unique_id: "grant_c1_desired_lwt"
+      value_template: "{{ value_json['informationParams']['93'][1][0][0] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 28.04°C
+
+    - name: "Actual DHW Temp"
+      unique_id: "grant_actual_dhw_temp"
+      value_template: "{{ value_json['informationParams']['61'][1][0][0] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 48.2°C
+
+    - name: "Outdoor Ambient Temp"
+      unique_id: "grant_outdoor_ambient_temp"
+      value_template: "{{ value_json['informationParams']['23'][1][0][0] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # HP unit's own reading — 1°C granularity. Verified in JSON: 18.1°C.
+      # Compare with 'Exterior Weather Sensor' in endpoint 2 (0.5°C, shows 17.0°C).
+
+    # --- Status ---
+    - name: "Water Pump Running"
+      unique_id: "grant_pump_running"
+      value_template: >
+        {% set s = value_json['informationParams']['11'][1][0][0] %}
+        {% if s == '2' %} No
+        {% elif s == '0' %} Yes
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified in JSON: "0" = Yes (pump currently running)
+
+    - name: "Heat Demanded"
+      unique_id: "grant_heat_demanded"
+      value_template: >
+        {% set s = value_json['informationParams']['26'][1][0][0] %}
+        {% if s == '1' %} No
+        {% elif s == '0' %} Yes
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified in JSON: "0" = Yes (heat currently demanded)
+
+    - name: "CH or DHW"
+      unique_id: "grant_ch_or_dhw"
+      value_template: >
+        {% set s = value_json['informationParams']['13'][1][0][0] %}
+        {% if s == '1' %} CH
+        {% elif s == '0' %} HW
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified in JSON: "1" = currently in CH (space heating) mode
+
+    - name: "DHW Work Mode"
+      unique_id: "grant_dhw_work_mode"
+      value_template: >
+        {% set s = value_json['data']['119']['value'] %}
+        {% if s == 2 %} Scheduled
+        {% elif s == 1 %} On
+        {% elif s == 0 %} Off
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified in JSON: 2 = Scheduled
+
+    - name: "Circuit 1 Work Mode"
+      unique_id: "grant_c1_work_mode"
+      value_template: >
+        {% set s = value_json['data']['236']['value'] %}
+        {% if s == 3 %} Scheduled
+        {% elif s == 1 %} Day
+        {% elif s == 2 %} Night
+        {% elif s == 0 %} Off
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified in JSON: 3 = Scheduled
+
+    - name: "Heat Pump Work State"
+      unique_id: "grant_hp_work_state"
+      value_template: >
+        {% set s = value_json['data']['1133']['value'] %}
+        {% if s == 1 %} On
+        {% elif s == 0 %} Off
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified: AxenWorkState param 1133 = 1 (On). Writable via rest_command.
+      # This is 'Heat pump work mode: On/Off' from your econet24 screenshot.
+
+    # --- Silent Mode ---
+    # Verified in JSON: HPSMMode (1386) = 2 (Schedule), HPSMSett (1385) = 0 (Level 1)
+    # Matches exactly what your econet24 screenshot shows.
+
+    - name: "Silent Mode"
+      unique_id: "grant_silent_mode"
+      value_template: >
+        {% set s = value_json['data']['1386']['value'] %}
+        {% if s == 0 %} Off
+        {% elif s == 2 %} Schedule
+        {% else %} {{ s }}
+        {% endif %}
+
+    - name: "Silent Mode Level"
+      unique_id: "grant_silent_mode_level"
+      value_template: >
+        {% set s = value_json['data']['1385']['value'] %}
+        {% if s == 0 %} Level 1
+        {% elif s == 2 %} Level 2
+        {% else %} {{ s }}
+        {% endif %}
+      # Level 1: fan ~450rpm, compressor max 50Hz (usable down to ~0°C outdoor)
+      # Level 2: fan ~400rpm, compressor max 40Hz (usable down to ~4-5°C outdoor)
+
+    # --- Fan speed caps (readable + writable via rest_commands) ---
+    # Verified in JSON: 550 / 575 / 700 / 850 rpm
+    # Note: caps do not apply during defrost or oil recovery cycles.
+    - name: "Fan Speed Cap Level 0"
+      unique_id: "grant_fan_cap_0"
+      value_template: "{{ value_json['data']['1443']['value'] }}"
+      unit_of_measurement: "rpm"
+      state_class: measurement
+      # HFANSPEED0 — verified: 550 rpm
+
+    - name: "Fan Speed Cap Level 1"
+      unique_id: "grant_fan_cap_1"
+      value_template: "{{ value_json['data']['1444']['value'] }}"
+      unit_of_measurement: "rpm"
+      state_class: measurement
+      # HFANSPEED1 — verified: 575 rpm
+
+    - name: "Fan Speed Cap Level 2"
+      unique_id: "grant_fan_cap_2"
+      value_template: "{{ value_json['data']['1445']['value'] }}"
+      unit_of_measurement: "rpm"
+      state_class: measurement
+      # HFANSPEED2 — verified: 700 rpm
+
+    - name: "Fan Speed Cap Level 3"
+      unique_id: "grant_fan_cap_3"
+      value_template: "{{ value_json['data']['1446']['value'] }}"
+      unit_of_measurement: "rpm"
+      state_class: measurement
+      # HFANSPEED3 — verified: 850 rpm
+
+    # --- Pump speed settings ---
+    # Verified in JSON: min=35%, mid=45%, max=85%
+
+    - name: "Pump Speed Min"
+      unique_id: "grant_pump_speed_min"
+      value_template: "{{ value_json['data']['1439']['value'] }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+
+    - name: "Pump Speed Mid"
+      unique_id: "grant_pump_speed_mid"
+      value_template: "{{ value_json['data']['1440']['value'] }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+
+    - name: "Pump Speed Max"
+      unique_id: "grant_pump_speed_max"
+      value_template: "{{ value_json['data']['1441']['value'] }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+
+    # --- User settings (editable via rest_commands) ---
+    - name: "DHW Target Temp Setting"
+      unique_id: "grant_dhw_target_temp"
+      value_template: "{{ value_json['data']['103']['value'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified: HDWTSetPoint = 48°C (range 35-65°C)
+
+    - name: "DHW Hysteresis"
+      unique_id: "grant_dhw_hysteresis"
+      value_template: "{{ value_json['data']['104']['value'] }}"
+      unit_of_measurement: "°C"
+      state_class: measurement
+      # Verified: HDWTSetPointDownHist = 8°C (range 5-18°C)
+      # No device_class — this is a differential/delta value, not an absolute temperature
+
+    - name: "DHW Load Time"
+      unique_id: "grant_dhw_load_time"
+      value_template: "{{ value_json['data']['113']['value'] }}"
+      state_class: measurement
+      # Verified: HDWLoadTime = 0
+
+    - name: "DHW Start Time"
+      unique_id: "grant_dhw_start_time"
+      value_template: "{{ value_json['data']['115']['value'] }}"
+      # Verified: HDWStartOneLoading = 0
+
+    - name: "Circuit 1 Comfort Day Temp"
+      unique_id: "grant_c1_comfort_temp"
+      value_template: "{{ value_json['data']['238']['value'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified: Circuit1ComfortTemp = 21.5°C (range 10-35°C)
+
+    - name: "Circuit 1 Eco Night Temp"
+      unique_id: "grant_c1_eco_temp"
+      value_template: "{{ value_json['data']['239']['value'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified: Circuit1EcoTemp = 17.5°C (range 10-35°C)
+
+    - name: "Circuit 1 Hysteresis"
+      unique_id: "grant_c1_hysteresis"
+      value_template: "{{ value_json['data']['240']['value'] }}"
+      unit_of_measurement: "°C"
+      state_class: measurement
+      # Verified: Circuit1DownHist = 0.1°C
+      # No device_class — differential value, not an absolute temperature
+
+    - name: "Weather Comp Curve"
+      unique_id: "grant_weather_curve"
+      value_template: "{{ value_json['data']['273']['value'] }}"
+      state_class: measurement
+      # Verified: Circuit1CurveRadiator = 1.0 (range 0-4)
+
+    - name: "Curve Shift"
+      unique_id: "grant_curve_shift"
+      value_template: "{{ value_json['data']['275']['value'] }}"
+      state_class: measurement
+      # Verified: Circuit1Curveshift = +2 (range -20 to +20)
+
+    - name: "Circuit 1 Base Flow Temp"
+      unique_id: "grant_c1_base_flow_temp"
+      value_template: "{{ value_json['data']['261']['value'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified: Circuit1BaseTemp = 45°C (range 24-75°C)
+
+    - name: "Circuit 1 Temp Reduction"
+      unique_id: "grant_c1_temp_reduction"
+      value_template: "{{ value_json['data']['262']['value'] }}"
+      unit_of_measurement: "°C"
+      state_class: measurement
+      # Verified: Circuit1TempReduction = 14°C (eco setback depth)
+      # No device_class — differential value, not an absolute temperature
+
+    - name: "Circuit 1 Curve Multiplier"
+      unique_id: "grant_c1_curve_multiplier"
+      value_template: "{{ value_json['data']['263']['value'] }}"
+      state_class: measurement
+      # Verified: Circuit1Multiplier = 1.5 (range 0-10)
+
+    - name: "Summer Mode On Temp"
+      unique_id: "grant_summer_on_temp"
+      value_template: "{{ value_json['data']['702']['value'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified: SummerOn = 19°C (switches to summer above this outdoor temp)
+
+    - name: "Summer Mode Off Temp"
+      unique_id: "grant_summer_off_temp"
+      value_template: "{{ value_json['data']['703']['value'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified: SummerOff = 17°C (reverts to winter below this outdoor temp)
+
+    # REMOVED: Legionella Temp — data['136'] in your JSON is Mixer6valveopeningtime
+    # (120 seconds) not a temperature. Would have shown 120°C which is wrong.
+    # To find the correct param: open /econet/editParams in your browser and look
+    # for a value around 60-65°C near the DHW/legionella section. Once found, add:
+    #
+    #   - name: "Legionella Temp"
+    #     unique_id: 'grant_legionella_temp'
+    #     value_template: "{{ value_json['data']['XXXX']['value'] }}"
+    #     unit_of_measurement: "°C"
+    #     device_class: temperature
+    #     state_class: measurement
+    - name: "Legionella Cycle State"
+      unique_id: "grant_legionella_cycle"
+      value_template: >
+        {% set s = value_json['editableParams']['319'][2] %}
+        {% if s == true %} Active
+        {% elif s == false %} Inactive
+        {% else %} {{ s }}
+        {% endif %}
+      # Verified: editableParams['319'][2] = false (not currently running)
+
+    - name: "Room Temperature Correction"
+      unique_id: "grant_room_temp_correction"
+      value_template: "{{ value_json['data']['263']['value'] | float }}"
+      # Removed unit_of_measurement: "°C" because this is a multiplier factor (0 to 10), not an absolute temperature.
+      state_class: measurement
+      icon: mdi:tune
+
+    - name: "DHW Boost Status"
+      unique_id: 'grant_dhw_boost_status'
+      value_template: "{{ value_json['data']['115']['value'] | int }}"
+      state_class: measurement
+      icon: mdi:rocket-launch
+
+      
+
+# ============================================================
+# ENDPOINT 2: regParams — room thermostat, flow, system data
+# ============================================================
+
+- authentication: basic
+  username: !secret econet_username
+  password: !secret econet_password
+  scan_interval: 30
+  resource: http://HUB_IP/econet/regParams
+  sensor:
+    - name: "Room Thermostat Temp"
+      unique_id: "grant_room_thermostat_temp"
+      value_template: "{{ value_json['curr']['Circuit1thermostat'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 20.5°C
+
+    - name: "System Pressure"
+      unique_id: "grant_system_pressure"
+      value_template: "{{ value_json['tilesParams'][76][0][0][0] }}"
+      unit_of_measurement: "BAR"
+      state_class: measurement
+      # Verified by counting tilesParams array: tile[76] = 1.7 BAR (reasonable value)
+
+    - name: "Exterior Weather Sensor"
+      unique_id: "grant_exterior_weather_sensor"
+      value_template: "{{ value_json['curr']['TempWthr'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Smart Controller's dedicated outdoor sensor — 0.5°C resolution.
+      # Verified in JSON: 17.0°C. HP unit itself reads 18.1°C (1°C granularity).
+      # This is the value used for weather compensation calculations.
+
+    - name: "Flow Rate"
+      unique_id: "grant_flow_rate_clean"
+      value_template: "{{ value_json['curr']['currentFlow'] | round(1) }}"
+      unit_of_measurement: "L/min"
+      state_class: measurement
+      # Verified in JSON: 18.33 l/min (direct reading, no conversion needed).
+      # Use this one for automations and graphs — more reliable than param 1211.
+
+    - name: "Buffer Temperature"
+      unique_id: "grant_buffer_temp"
+      value_template: "{{ value_json['curr']['TempBuforDown'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 27.4°C
+
+    - name: "Circuit 2 Flow Temp"
+      unique_id: "grant_circuit2_temp"
+      value_template: "{{ value_json['curr']['TempCircuit2'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 29.4°C
+
+    - name: "Heat Source Calculated Target"
+      unique_id: "grant_heat_source_calc_target"
+      value_template: "{{ value_json['curr']['HeatSourceCalcPresetTemp'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # Verified in JSON: 30°C — what weather compensation has actually calculated.
+      # Useful to graph alongside actual flow temp to see how well the HP tracks it.
+
+    - name: "Internal Pump Power"
+      unique_id: "grant_pump_power_pct"
+      value_template: "{{ value_json['curr']['ahsPumpPower'] }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+      # Verified in JSON: 0% (pump at idle/min speed currently)
+
+    - name: "Session Electrical Energy"
+      unique_id: "grant_session_elec_energy"
+      value_template: "{{ value_json['tilesParams'][73][0][0][0] }}"
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: measurement
+      # CORRECTED: was tile[72] (wrong — that's the running total ~19.8 kWh).
+      # tile[73] = 0.3 kWh — current session electrical consumption.
+      # state_class is measurement (not total_increasing) because this resets each run.
+
+    - name: "Session Thermal Energy"
+      unique_id: "grant_session_thermal_energy"
+      value_template: "{{ value_json['tilesParams'][74][0][0][0] }}"
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: measurement
+      # CORRECTED: was tile[73] (wrong). tile[74] = 3.8 kWh — current session heat output.
+      # state_class is measurement (not total_increasing) because this resets each run.
+
+    - name: "Session COP"
+      unique_id: "grant_session_cop"
+      value_template: "{{ value_json['tilesParams'][75][0][0][0] }}"
+      state_class: measurement
+      # tile[75] = 0.0 in your JSON (HP was likely idle when snapshot taken).
+      # Will show a real figure during active heating runs.
+
+
+      # https://claude.ai/chat/16acdbdd-38c4-4ade-907d-8a885efe9346
+# Add this sensor to rest_grant_ashp.yaml, inside the block that reads
+#   resource: http://HUB_IP/econet/regParams
+# under its existing "sensor:" list - e.g. right after "Room Thermostat Temp".
+# Then reload: Developer Tools -> YAML -> RESTful entities (no restart needed).
+ 
+    - name: "Room Thermostat Request"
+      unique_id: "grant_room_thermostat_request"
+      icon: mdi:thermostat
+      value_template: >-
+        {%- set r = (value_json.get('schemaParams', {}).get('reakcja_termostat1')) | string -%}
+        {{- 'Satisfied' if 'Nie grzej' in r else 'Heat' if 'Grzej' in r else 'unknown' -}}
+      # Circuit 1 room thermostat: "Grzej" = asking for heat, "Nie grzej" = satisfied.
+      # Satisfied = room has reached its target, so the controller lowers the flow by the
+      # temperature reduction (3 °C). Seen Oct 2026: afternoon = Grzej, night = Nie grzej.
+
+
+# TEST SENSOR - candidate "heat pump switched off" flag.
+# Add to rest_grant_ashp.yaml, in the block that reads
+#   resource: http://HUB_IP/econet/regParams
+# under its "sensor:" list (next to Room Thermostat Request), then reload RESTful entities.
+#
+# In the hub's tile list, entry 77 was 0 at 23:47 (running) and 1 at 01:31 (switched off
+# for the night). Nothing else apart from temperatures changed. Leave it recording
+# overnight and through tomorrow:
+#   - 1 only overnight, 0 during normal daytime pauses  -> it's the "off" flag
+#   - 1 whenever the compressor isn't running            -> it just means "stopped"
+ 
+    - name: "Heat Pump Hub Flag 77"
+      unique_id: "grant_hub_tile_77"
+      icon: mdi:flag-outline
+      value_template: >-
+        {{- value_json['tilesParams'][77][0][0][0] -}}

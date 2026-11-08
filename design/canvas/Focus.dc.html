@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>B · Focus heat pump card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:420px; height:780px; box-sizing:border-box; padding:16px; background:#E8EDF4; font-family:Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif; color:#0B1220;">
+<div style="position:relative; width:388px; box-sizing:border-box; padding:18px 16px 10px; background:#FFFFFF; border-radius:24px; box-shadow:0 1px 2px rgba(11,18,32,0.06), 0 10px 30px rgba(11,18,32,0.06); overflow:hidden;">
+
+  <div style="display:flex; align-items:flex-start; gap:8px;">
+    <div style="flex:1; min-width:0; padding-top:2px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="width:10px; height:10px; flex:none; border-radius:5px; background:{{stColor}}; box-shadow:0 0 0 4px {{stHalo}};"></span>
+        <span style="font-size:21px; font-weight:800; letter-spacing:-0.02em; line-height:1.15;">{{st.title}}</span>
+      </div>
+      <div style="margin-top:5px; font-size:13px; line-height:1.4; font-weight:500; color:#4A5567; text-wrap:pretty;">{{st.sub}} · {{st.since}}</div>
+    </div>
+    <button onClick="{{openKey}}" aria-label="Chart key" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:0; border-radius:22px; background:#F3F5F9; color:#24324A; cursor:pointer;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.list}}"></path></svg>
+    </button>
+    <button onClick="{{openAdj}}" aria-label="Adjust heating" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:0; border-radius:22px; background:#0B1220; color:#FFFFFF; cursor:pointer;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.sliders}}"></path></svg>
+    </button>
+  </div>
+
+  <div role="group" aria-label="Choose a chart" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-top:16px;">
+    <sc-for list="{{tiles}}" as="t" hint-placeholder-count="3">
+      <button onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="position:relative; display:flex; flex-direction:column; align-items:flex-start; height:106px; padding:12px 12px 10px; border:0; border-radius:18px; background:{{t.bg}}; color:{{t.fg}}; text-align:left; cursor:pointer; font-family:Manrope, system-ui, sans-serif; box-sizing:border-box;">
+        <span style="font-size:12px; font-weight:700; color:{{t.lc}};">{{t.label}}</span>
+        <span style="margin-top:2px; font-size:24px; font-weight:800; letter-spacing:-0.03em; line-height:1.1;">{{t.value}}</span>
+        <span style="margin-top:2px; font-size:11.5px; font-weight:600; color:{{t.lc}}; white-space:nowrap;">{{t.sub}}</span>
+        <span style="position:relative; display:block; width:88px; height:20px; margin-top:auto;">
+          <svg width="88" height="20" viewBox="0 0 88 20" style="position:absolute; left:0; top:0;" aria-hidden="true"><path d="{{t.spark}}" fill="none" stroke="{{t.sc}}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></path></svg>
+          <span style="position:absolute; left:{{t.dx}}px; top:{{t.dy}}px; width:6px; height:6px; margin:-3px 0 0 -3px; border-radius:3px; background:{{t.sc}}; box-shadow:0 0 0 2px {{t.bg}}; opacity:{{t.dop}};"></span>
+        </span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:18px; height:30px;">
+    <div style="display:flex; align-items:center; gap:10px; min-width:0; overflow:hidden;">
+      <span style="font-size:14px; font-weight:800; white-space:nowrap;">{{chartTitle}}</span>
+      <sc-for list="{{keys}}" as="k" hint-placeholder-count="2"><span style="display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; color:#4A5567; white-space:nowrap;"><span style="width:12px; height:0; border-top:2px {{k.ls}} {{k.c}};"></span>{{k.label}}</span></sc-for>
+    </div>
+    <sc-if value="{{insp}}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{clear}}" aria-label="Stop inspecting" style="flex:none; height:30px; display:flex; align-items:center; gap:5px; padding:0 8px 0 10px; border:0; border-radius:15px; background:#0B1220; color:#FFFFFF; font:700 12px Manrope, system-ui, sans-serif; cursor:pointer; white-space:nowrap;">
+        {{rd.when}}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="{{ic.x}}"></path></svg>
+      </button>
+    </sc-if>
+    <sc-if value="{{notInsp}}" hint-placeholder-val="{{ true }}">
+      <span style="flex:none; font-size:12px; font-weight:700; color:#64748B; white-space:nowrap;">{{winShort}}</span>
+    </sc-if>
+  </div>
+
+  <div style="position:relative; margin-top:8px;">
+    <div style="position:relative; height:190px;">
+      <sc-for list="{{bands}}" as="b" hint-placeholder-count="2">
+        <div style="position:absolute; top:0; bottom:0; left:{{b.x}}px; width:{{b.w}}px; background:{{bandBg}};">
+          <span style="position:absolute; top:5px; left:6px; font-size:9.5px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:{{bandFg}}; opacity:{{b.lop}}; white-space:nowrap;">{{bandLabel}}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{fcOn}}" hint-placeholder-val="{{ false }}"><div style="position:absolute; top:0; bottom:0; left:{{nowX}}px; right:0; background:rgba(243,245,249,0.75); border-left:1px solid #CBD3DF;"></div></sc-if>
+      <svg width="356" height="190" viewBox="0 0 356 190" style="position:absolute; left:0; top:0;" aria-hidden="true">
+        <path d="{{p.grid}}" fill="none" stroke="#E7EBF1" stroke-width="1"></path>
+        <path d="{{p.area}}" fill="{{p.areaC}}" fill-opacity="{{p.areaO}}" stroke="none"></path>
+        <path d="{{p.l0.d}}" fill="none" stroke="{{p.l0.c}}" stroke-width="{{p.l0.w}}" stroke-dasharray="{{p.l0.da}}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="{{p.l1.d}}" fill="none" stroke="{{p.l1.c}}" stroke-width="{{p.l1.w}}" stroke-dasharray="{{p.l1.da}}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="{{p.l2.d}}" fill="none" stroke="{{p.l2.c}}" stroke-width="{{p.l2.w}}" stroke-dasharray="{{p.l2.da}}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="{{p.l3.d}}" fill="none" stroke="{{p.l3.c}}" stroke-width="{{p.l3.w}}" stroke-dasharray="{{p.l3.da}}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="{{p.l4.d}}" fill="none" stroke="{{p.l4.c}}" stroke-width="{{p.l4.w}}" stroke-dasharray="{{p.l4.da}}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="{{p.l5.d}}" fill="none" stroke="{{p.l5.c}}" stroke-width="{{p.l5.w}}" stroke-dasharray="{{p.l5.da}}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </svg>
+      <sc-for list="{{p.ticks}}" as="k" hint-placeholder-count="5"><div style="position:absolute; right:0; top:{{k.y}}px; transform:translateY(-50%); font-size:10px; font-weight:600; line-height:12px; color:#64748B; text-shadow:0 0 3px #FFFFFF, 0 0 3px #FFFFFF, 0 0 3px #FFFFFF;">{{k.label}}</div></sc-for>
+      <sc-for list="{{p.dots}}" as="m" hint-placeholder-count="2">
+        <div style="position:absolute; left:{{m.x}}px; top:{{m.y}}px; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:{{m.c}}; box-shadow:0 0 0 2px #FFFFFF;"></div>
+        <div style="position:absolute; left:{{m.lx}}px; top:{{m.ly}}px; transform:{{m.tf}}; font-size:10.5px; font-weight:800; line-height:12px; color:#24324A; white-space:nowrap; text-shadow:0 0 3px #FFFFFF, 0 0 3px #FFFFFF;">{{m.label}}</div>
+      </sc-for>
+      <sc-for list="{{chg}}" as="c" hint-placeholder-count="1">
+        <div style="position:absolute; top:0; bottom:0; left:{{c.x}}px; width:1px; background:#CBD3DF;"></div>
+        <div title="{{c.text}}" style="position:absolute; bottom:4px; left:{{c.x}}px; width:16px; height:16px; margin-left:-8px; border-radius:8px; background:#0B1220; color:#FFFFFF; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px #FFFFFF;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.sliders}}"></path></svg>
+        </div>
+      </sc-for>
+      <div style="position:absolute; top:0; bottom:0; left:{{cur.x}}px; width:1.5px; margin-left:-0.75px; background:#0B1220; opacity:{{cur.op}};"></div>
+      <sc-for list="{{cur.dots}}" as="m" hint-placeholder-count="2"><div style="position:absolute; left:{{m.x}}px; top:{{m.y}}px; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:{{m.c}}; box-shadow:0 0 0 2.5px #FFFFFF;"></div></sc-for>
+    </div>
+    <div style="position:relative; height:8px; margin-top:10px; border-radius:4px; overflow:hidden; background:#F3F5F9;">
+      <sc-for list="{{segs}}" as="g" hint-placeholder-count="6"><div style="position:absolute; top:0; bottom:0; left:{{g.x}}px; width:{{g.w}}px; background:{{g.c}}; box-shadow:0 0 0 1px #FFFFFF;"></div></sc-for>
+      <div style="position:absolute; top:0; bottom:0; left:{{cur.x}}px; width:2px; margin-left:-1px; background:#0B1220; opacity:{{cur.op}};"></div>
+    </div>
+    <div style="position:relative; height:16px; margin-top:6px;">
+      <sc-for list="{{xt}}" as="x" hint-placeholder-count="5"><div style="position:absolute; left:{{x.x}}px; top:0; transform:translateX(-50%); font-size:11px; font-weight:{{x.fw}}; line-height:16px; color:#64748B; white-space:nowrap;">{{x.label}}</div></sc-for>
+    </div>
+    <div onPointerDown="{{onScrub}}" onPointerMove="{{onScrub}}" aria-label="Chart area. Drag to inspect a moment." style="position:absolute; left:0; right:0; top:0; height:208px; cursor:crosshair; touch-action:pan-y;"></div>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:6px; margin-top:14px;">
+    <button aria-label="Earlier" onClick="{{back}}" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:0; border-radius:22px; background:#F3F5F9; color:#24324A; cursor:pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.chevL}}"></path></svg>
+    </button>
+    <div role="group" aria-label="Time range" style="flex:1; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:2px; padding:3px; border-radius:22px; background:#F3F5F9;">
+      <sc-for list="{{ranges}}" as="r" hint-placeholder-count="5">
+        <button onClick="{{r.pick}}" aria-pressed="{{r.on}}" style="height:38px; border:0; border-radius:19px; background:{{r.bg}}; color:{{r.fg}}; box-shadow:{{r.sh}}; font:700 13px Manrope, system-ui, sans-serif; cursor:pointer;">{{r.label}}</button>
+      </sc-for>
+    </div>
+    <button aria-label="{{fwdLabel}}" onClick="{{fwd}}" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:0; border-radius:22px; background:{{fwdBg}}; color:{{fwdFg}}; cursor:pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{fwdIcon}}"></path></svg>
+    </button>
+  </div>
+
+  <p style="margin:14px 2px 0; font-size:13px; line-height:1.5; font-weight:500; color:#4A5567; text-wrap:pretty;">{{summary}}</p>
+
+  <div style="display:flex; flex-wrap:wrap; gap:0 6px; margin-top:4px;">
+    <sc-for list="{{layers}}" as="y" hint-placeholder-count="3">
+      <button onClick="{{y.toggle}}" aria-pressed="{{y.on}}" style="height:44px; display:flex; align-items:center; padding:0; border:0; background:none; cursor:pointer; font:700 12px Manrope, system-ui, sans-serif;">
+        <span style="height:32px; display:inline-flex; align-items:center; gap:6px; padding:0 12px 0 10px; border-radius:16px; background:{{y.bg}}; color:{{y.fg}};">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{y.icon}}"></path></svg>
+          {{y.label}}
+          <sc-if value="{{y.beta}}" hint-placeholder-val="{{ false }}"><span style="font-size:9px; font-weight:800; letter-spacing:0.05em; padding:2px 5px; border-radius:6px; background:#FFFFFF; color:#4A5567;">BETA</span></sc-if>
+        </span>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:absolute; left:16px; right:16px; bottom:14px; display:flex; align-items:center; gap:8px; padding:12px 14px; border-radius:16px; background:#0B1220; color:#FFFFFF; font-size:13px; font-weight:700; box-shadow:0 8px 24px rgba(11,18,32,0.28);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.check}}"></path></svg>
+      {{toast}}
+    </div>
+  </sc-if>
+
+  <sc-if value="{{keyOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(11,18,32,0.3);"></div>
+    <div role="dialog" aria-label="Chart key" style="position:absolute; left:0; right:0; bottom:0; top:96px; display:flex; flex-direction:column; background:#FFFFFF; border-radius:24px 24px 0 0; box-shadow:0 -10px 30px rgba(11,18,32,0.18);">
+      <div style="display:flex; align-items:center; padding:14px 8px 4px 18px;">
+        <span style="flex:1; font-size:17px; font-weight:800;">How to read this</span>
+        <button onClick="{{closeKey}}" aria-label="Close key" style="width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:0; border-radius:22px; background:none; color:#24324A; cursor:pointer;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="{{ic.x}}"></path></svg>
+        </button>
+      </div>
+      <div style="flex:1; min-height:0; overflow:auto; padding:0 18px 16px;">
+        <div style="font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#64748B; margin:6px 0 4px;">Lines · {{rd.when}}</div>
+        <sc-for list="{{keyLines}}" as="k" hint-placeholder-count="6">
+          <div style="display:flex; align-items:center; gap:10px; height:34px; border-bottom:1px solid #EEF1F5;">
+            <span style="width:18px; height:0; border-top:2.5px {{k.ls}} {{k.c}};"></span>
+            <span style="flex:1; font-size:13.5px; font-weight:600;">{{k.label}}</span>
+            <span style="font-size:13.5px; font-weight:800; font-variant-numeric:tabular-nums;">{{k.val}}</span>
+          </div>
+        </sc-for>
+        <div style="font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#64748B; margin:16px 0 6px;">The strip under the chart</div>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px;">
+          <sc-for list="{{keyModes}}" as="k" hint-placeholder-count="5">
+            <div style="display:flex; align-items:center; gap:8px; height:34px; padding:0 10px; border-radius:10px; background:{{k.bg}};">
+              <span style="width:10px; height:10px; border-radius:3px; background:{{k.c}};"></span>
+              <span style="font-size:13px; font-weight:{{k.fw}};">{{k.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#64748B; margin:16px 0 6px;">Backgrounds</div>
+        <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:600;">
+          <div style="display:flex; align-items:center; gap:10px;"><span style="width:22px; height:14px; border-radius:4px; background:#F1EFFC; box-shadow:inset 0 0 0 1px #DCD7F5;"></span>Night schedule: room set to {{nightSet}}</div>
+          <div style="display:flex; align-items:center; gap:10px;"><span style="width:22px; height:14px; border-radius:4px; background:#FFFFFF; box-shadow:inset 0 0 0 1px #DDE3EC;"></span>Day schedule: room set to {{daySet}}</div>
+          <div style="display:flex; align-items:center; gap:10px;"><span style="width:22px; height:14px; border-radius:4px; background:#FFF5D6; box-shadow:inset 0 0 0 1px #F0DD9E;"></span>Daylight (on the Outside chart)</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{adj}}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-label="Adjust heating" style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; background:#FFFFFF;">
+      <div style="display:flex; align-items:center; gap:4px; padding:12px 8px 6px 8px; flex:none;">
+        <button onClick="{{closeAdj}}" aria-label="Back to the chart" style="width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:0; border-radius:22px; background:#F3F5F9; color:#24324A; cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.chevL}}"></path></svg>
+        </button>
+        <span style="flex:1; padding-left:8px; font-size:18px; font-weight:800; letter-spacing:-0.01em;">Adjust heating</span>
+        <button onClick="{{reset}}" style="height:36px; padding:0 12px; border:0; border-radius:18px; background:none; color:#1E3FAE; font:700 13px Manrope, system-ui, sans-serif; cursor:pointer;">Reset</button>
+      </div>
+      <div style="flex:1; min-height:0; overflow:auto; padding:4px 16px 12px;">
+        <div style="font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#64748B; margin:6px 2px 8px;">Room temperatures</div>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px;">
+          <sc-for list="{{comfort}}" as="c" hint-placeholder-count="2">
+            <div style="padding:12px 12px 10px; border-radius:18px; background:{{c.bg}}; box-shadow:{{c.ring}};">
+              <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:#4A5567;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg>
+                {{c.label}}
+                <sc-if value="{{c.active}}" hint-placeholder-val="{{ false }}"><span style="font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px; background:#FFFFFF; color:#24324A;">NOW</span></sc-if>
+              </div>
+              <div style="font-size:30px; font-weight:800; letter-spacing:-0.03em; margin-top:4px; color:{{c.fg}};">{{c.val}}</div>
+              <div style="display:flex; gap:8px; margin-top:8px;">
+                <button onClick="{{c.dec}}" aria-label="Lower {{c.label}}" style="flex:1; height:44px; display:flex; align-items:center; justify-content:center; border:0; border-radius:14px; background:#FFFFFF; color:#24324A; cursor:pointer; box-shadow:0 1px 2px rgba(11,18,32,0.08);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{ic.minus}}"></path></svg>
+                </button>
+                <button onClick="{{c.inc}}" aria-label="Raise {{c.label}}" style="flex:1; height:44px; display:flex; align-items:center; justify-content:center; border:0; border-radius:14px; background:#FFFFFF; color:#24324A; cursor:pointer; box-shadow:0 1px 2px rgba(11,18,32,0.08);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>
+                </button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:8px 2px 0; font-size:12px; font-weight:600; color:#64748B;">{{schedNote}}</div>
+
+        <div style="font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#64748B; margin:20px 2px 8px;">Where the flow target comes from</div>
+        <div style="padding:6px 14px; border-radius:18px; background:#F3F5F9;">
+          <sc-for list="{{receipt}}" as="r" hint-placeholder-count="4">
+            <div style="display:flex; align-items:center; gap:8px; min-height:36px; border-bottom:1px solid #E3E8EF;">
+              <span style="flex:1; font-size:13px; font-weight:600; color:#24324A;">{{r.label}}</span>
+              <span style="width:48px; text-align:right; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; color:{{r.nc}};">{{r.now}}</span>
+              <span style="width:48px; text-align:right; font-size:13px; font-weight:800; font-variant-numeric:tabular-nums; color:#1E3FAE; opacity:{{newOp}};">{{r.nw}}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex; align-items:center; gap:8px; min-height:48px;">
+            <span style="flex:1; font-size:14px; font-weight:800;">Flow target</span>
+            <span style="width:48px; text-align:right; font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; color:{{totNowC}};">{{bdNow.targetTxt}}°</span>
+            <span style="width:48px; text-align:right; font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; color:#1E3FAE; opacity:{{newOp}};">{{bdNew.targetTxt}}°</span>
+          </div>
+        </div>
+
+        <div style="font-size:11px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#64748B; margin:20px 2px 2px;">Fine-tune</div>
+        <sc-for list="{{sliders}}" as="c" hint-placeholder-count="4">
+          <div style="padding:10px 2px 4px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
+              <label for="{{c.id}}" style="font-size:14px; font-weight:700;">{{c.label}}</label>
+              <span style="font-size:14px; font-weight:800; color:{{c.fg}}; font-variant-numeric:tabular-nums;">{{c.val}}</span>
+            </div>
+            <div style="font-size:12px; font-weight:500; color:#64748B; margin-top:1px;">{{c.hint}}</div>
+            <input id="{{c.id}}" type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.v}}" onChange="{{c.onChange}}" style="display:block; width:100%; height:28px; margin:6px 0 0; accent-color:#1E3FAE; cursor:pointer;">
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex; gap:8px; padding:10px 16px 14px; border-top:1px solid #EEF1F5; flex:none;">
+        <button onClick="{{closeAdj}}" style="flex:1; height:48px; border:0; border-radius:24px; background:#F3F5F9; color:#0B1220; font:800 14px Manrope, system-ui, sans-serif; cursor:pointer;">Cancel</button>
+        <button onClick="{{save}}" disabled="{{notDirty}}" style="flex:1.4; height:48px; border:0; border-radius:24px; background:{{saveBg}}; color:{{saveFg}}; font:800 14px Manrope, system-ui, sans-serif; cursor:pointer;">{{saveLabel}}</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["live","inspect","adjust","key"],"default":"live"},"at":{"editor":"int","default":820,"min":230,"max":950},"tab":{"editor":"enum","options":["flow","room","out"],"default":"flow"},"$preview":{"width":420,"height":780}}'>
+var HP = (function () {
+  var NOW = 950, SIM0 = -9300, SIMN = NOW + 360 - SIM0 + 1, MAXBACK = 10080;
+  var SPAN = { '3h': 180, '6h': 360, '12h': 720, '24h': 1440, '3d': 4320 };
+  var RANGES = ['3h', '6h', '12h', '24h', '3d'];
+  var LONG = { '3h': 'Last 3 hours', '6h': 'Last 6 hours', '12h': 'Last 12 hours', '24h': 'Last 24 hours', '3d': 'Last 3 days' };
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var DEF = { slope: 0.7, shift: 6, roomK: 0.7, setback: 3, day: 22.2, night: 19.5 };
+  var NAMES = { H: 'Heating', A: 'At temp', W: 'Hot water', P: 'Paused', D: 'Defrost' };
+  function md(t) { return ((t % 1440) + 1440) % 1440; }
+  function di(t) { return Math.floor(t / 1440); }
+  function wd(t) { return ((di(t) % 7) + 7) % 7; }
+  function wrap(t) { return t < -2880 ? -2880 + md(t) : t; }
+  function p2(n) { return n < 10 ? '0' + n : '' + n; }
+  function fx(n) { return Math.round(n * 10) / 10; }
+  function f1(n) { return (Math.round(n * 10) / 10).toFixed(1); }
+  function sg(n, d) { var a = Math.abs(n).toFixed(d === undefined ? 1 : d); if (+a === 0) return (0).toFixed(d === undefined ? 1 : d); return (n < 0 ? '−' : '+') + a; }
+  function hm(t) { var m = md(t), h = Math.floor(m / 60); return (h % 12 || 12) + ':' + p2(m % 60) + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  function hr(t) { var m = md(t), h = Math.floor(m / 60), mm = m % 60; return (h % 12 || 12) + (mm ? ':' + p2(mm) : '') + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  function hh(t) { var m = md(t); return p2(Math.floor(m / 60)) + ':' + p2(m % 60); }
+  function when(t) { return di(t) === 0 ? hm(t) : DAYS[wd(t)] + ' ' + hm(t); }
+  function dur(m) { m = Math.round(m); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : ''); }
+  function prep(kp) {
+    var n = kp.length, m = [], d = [], k;
+    for (k = 0; k < n - 1; k++) d[k] = (kp[k + 1][1] - kp[k][1]) / (kp[k + 1][0] - kp[k][0]);
+    for (k = 0; k < n; k++) m[k] = k === 0 ? d[0] : k === n - 1 ? d[n - 2] : (d[k - 1] * d[k] <= 0 ? 0 : 2 / (1 / d[k - 1] + 1 / d[k]));
+    return { kp: kp, m: m };
+  }
+  function interp(P, t) {
+    var kp = P.kp, m = P.m, n = kp.length; t = wrap(t);
+    if (t <= kp[0][0]) return kp[0][1];
+    if (t >= kp[n - 1][0]) return kp[n - 1][1];
+    var lo = 0, hi = n - 1;
+    while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (kp[mid][0] <= t) lo = mid; else hi = mid; }
+    var x0 = kp[lo][0], h = kp[hi][0] - x0, u = (t - x0) / h, u2 = u * u, u3 = u2 * u;
+    return (2 * u3 - 3 * u2 + 1) * kp[lo][1] + (u3 - 2 * u2 + u) * h * m[lo] + (3 * u2 - 2 * u3) * kp[hi][1] + (u3 - u2) * h * m[hi];
+  }
+  var OUTP = prep([[-2880, 5.3], [-2700, 4.1], [-2430, 3.2], [-2250, 6.2], [-2040, 9.0], [-1800, 7.4], [-1560, 6.0], [-1300, 4.6], [-990, 4.0], [-860, 6.1], [-720, 8.6], [-570, 9.8], [-460, 9.3], [-360, 8.0], [-120, 5.6], [0, 4.6], [150, 3.7], [300, 2.5], [420, 2.2], [470, 2.0], [510, 2.3], [560, 4.6], [585, 6.8], [610, 6.2], [630, 5.0], [660, 5.3], [720, 6.6], [790, 7.9], [855, 8.8], [910, 8.6], [950, 8.4], [1020, 7.6], [1080, 6.9], [1140, 6.2], [1200, 5.8], [1320, 5.1], [1440, 4.6]]);
+  var ROOMP = prep([[-2880, 21.5], [-2600, 20.9], [-2415, 20.6], [-2300, 21.0], [-2100, 21.5], [-1980, 21.9], [-1800, 22.1], [-1600, 21.8], [-1440, 21.5], [-1200, 21.0], [-975, 20.6], [-860, 20.9], [-700, 21.2], [-576, 21.0], [-480, 22.2], [-400, 22.3], [-200, 22.3], [-60, 22.1], [0, 21.9], [144, 21.5], [230, 20.9], [330, 20.6], [475, 20.3], [540, 20.5], [600, 20.65], [710, 21.2], [780, 21.5], [830, 21.3], [870, 21.5], [884, 22.5], [892, 23.2], [904, 22.8], [925, 22.25], [950, 21.9]]);
+  var MODE = [[-2880, -2840, 'A'], [-2840, -2820, 'W'], [-2820, -2415, 'A'], [-2415, -2080, 'H'], [-2080, -2042, 'W'], [-2042, -1710, 'H'], [-1710, -1400, 'A'], [-1400, -1378, 'W'], [-1378, -975, 'A'], [-975, -645, 'H'], [-645, -608, 'W'], [-608, -355, 'H'], [-355, -338, 'P'], [-338, -303, 'H'], [-303, 35, 'A'], [35, 58, 'W'], [58, 465, 'A'], [465, 800, 'H'], [800, 840, 'W'], [840, 890, 'H'], [890, 902, 'A'], [902, 918, 'P'], [918, 930, 'A'], [930, 1e9, 'H']];
+  var TH = [[0, 35], [465, 37], [472, 41], [520, 40], [525, 41], [530, 40], [540, 39], [555, 38], [615, 39], [640, 40], [685, 39], [690, 40], [750, 39], [840, 38], [1080, 37]];
+  var TA = [[0, 37], [58, 30], [120, 31], [180, 32], [880, 34], [915, 35], [1137, 34], [1260, 35], [1410, 37]];
+  var CHANGES = [{ t: 641, label: 'Curve shift', from: '5 °C', to: '6 °C' }, { t: -280, label: 'Night temperature', from: '19.0 °C', to: '19.5 °C' }, { t: -2335, label: 'Room correction', from: '0.5', to: '0.7' }];
+  function modeAt(t) { t = wrap(t); var lo = 0, hi = MODE.length - 1; while (lo < hi) { var mid = (lo + hi) >> 1; if (MODE[mid][1] <= t) lo = mid + 1; else hi = mid; } return MODE[lo][2]; }
+  function stepv(tp, m) { var v = tp[0][1]; for (var k = 1; k < tp.length && tp[k][0] <= m; k++) v = tp[k][1]; return v; }
+  function tgtFor(t, s) { return s === 'W' ? 56 : s === 'P' ? NaN : stepv(s === 'A' ? TA : TH, md(t)); }
+  function sched(t) {
+    var m = md(t), w = wd(t);
+    if (m >= 465 && m < 540) return 'day';
+    if (w === 0) return (m < 90 || (m >= 990 && m < 1080)) ? 'day' : 'night';
+    if (w === 6) return (m >= 840 && m < 1110) ? 'day' : 'night';
+    return (m >= 960 && m < 1080) ? 'day' : 'night';
+  }
+  function setAt(t, s) { return sched(t) === 'day' ? s.day : s.night; }
+  function sunUp(t) { var m = md(t); return m >= 430 && m < 982; }
+  var S = (function () {
+    var n = SIMN, flow = new Float32Array(n), ret = new Float32Array(n), tgt = new Float32Array(n), room = new Float32Array(n), out = new Float32Array(n), raw = new Float32Array(n), dfr = new Uint8Array(n), st = new Array(n);
+    var f = 31, frost = 0.35, left = 0, prev = 'A';
+    for (var i = 0; i < n; i++) {
+      var t = SIM0 + i, s = modeAt(t), o = interp(OUTP, t) + 0.04 * Math.sin((t - NOW) * 0.21);
+      out[i] = o; st[i] = s;
+      if (t > NOW) { flow[i] = NaN; ret[i] = NaN; tgt[i] = NaN; room[i] = NaN; continue; }
+      var T = tgtFor(t, s);
+      if (prev === 'W' && s !== 'W') f = Math.min(f, 24.5);
+      if (prev !== 'W' && s === 'W') f = Math.min(f, 30);
+      if (left <= 0 && (s === 'H' || s === 'A') && o < 7.5) { frost += 1 / (35 + 6 * Math.max(o, 0)); if (frost >= 1) { frost = 0; left = 5 + (md(t) % 3); } }
+      var aim, tau;
+      if (left > 0) { aim = 21.5; tau = 1.6; dfr[i] = 1; left--; }
+      else if (s === 'P') { aim = 26; tau = 25; }
+      else if (s === 'W') { aim = 57.5; tau = 17; }
+      else { aim = T - 0.5; tau = f < aim - 3 ? 6 : f > aim ? 5 : 9; }
+      f += (aim - f) * (1 - Math.exp(-1 / tau));
+      raw[i] = f;
+      flow[i] = f + 0.12 * Math.sin(t * 0.9) + 0.08 * Math.sin(t * 2.3 + 1.7);
+      ret[i] = (i >= 3 ? raw[i - 3] : f) - (s === 'P' ? 1.2 : s === 'W' ? 5.2 : 4.4) + 0.1 * Math.sin(t * 1.3);
+      tgt[i] = T;
+      room[i] = interp(ROOMP, t) + 0.03 * Math.sin((t - NOW) * 0.37) + 0.02 * Math.sin((t - NOW) * 1.1);
+      prev = s;
+    }
+    return { flow: flow, ret: ret, tgt: tgt, room: room, out: out, st: st, dfr: dfr };
+  })();
+  function line(arr, t0, t1, X, Y, maxPts) {
+    var n = t1 - t0; if (n <= 0) return '';
+    var step = Math.max(1, Math.ceil(n / maxPts)), d = '', pen = false;
+    for (var a = t0; a <= t1; a += step) {
+      var b = Math.min(a + step - 1, t1), lo = Infinity, hi = -Infinity, tl = a, th = a, gap = false;
+      for (var t = a; t <= b; t++) { var v = arr[t - SIM0]; if (v === undefined || v !== v) { gap = true; continue; } if (v < lo) { lo = v; tl = t; } if (v > hi) { hi = v; th = t; } }
+      if (lo === Infinity) { pen = false; continue; }
+      if (step === 1 || lo === hi) { d += (pen ? 'L' : 'M') + fx(X(tl)) + ' ' + fx(Y(lo)); }
+      else { var p = tl < th ? [tl, lo, th, hi] : [th, hi, tl, lo]; d += (pen ? 'L' : 'M') + fx(X(p[0])) + ' ' + fx(Y(p[1])) + 'L' + fx(X(p[2])) + ' ' + fx(Y(p[3])); }
+      pen = !gap;
+    }
+    return d;
+  }
+  function steps(t0, t1, X, Y, val) {
+    var d = '', cv = null, lastT = t0;
+    for (var t = t0; t <= t1; t++) {
+      var v = val(t);
+      if (v !== v) { if (cv !== null) d += 'H' + fx(X(t)); cv = null; continue; }
+      if (cv === null) { d += 'M' + fx(X(t)) + ' ' + fx(Y(v)); cv = v; }
+      else if (v !== cv) { d += 'H' + fx(X(t)) + 'V' + fx(Y(v)); cv = v; }
+      lastT = t;
+    }
+    if (cv !== null) d += 'H' + fx(X(lastT));
+    return d;
+  }
+  function tsteps(t0, t1, X, Y) {
+    var o = { H: '', A: '', W: '' }, cs = null, cv = 0, lastT = t0;
+    for (var t = t0; t <= t1; t++) {
+      var i = t - SIM0, s = S.st[i], v = S.tgt[i];
+      if (s === 'P' || v !== v) { if (cs) o[cs] += 'H' + fx(X(t)); cs = null; continue; }
+      var x = fx(X(t)), y = fx(Y(v));
+      if (s !== cs) { if (cs) { o[cs] += 'H' + x; o[s] += 'M' + x + ' ' + fx(Y(cv)) + 'V' + y; } else o[s] += 'M' + x + ' ' + y; cs = s; cv = v; }
+      else if (v !== cv) { o[s] += 'H' + x + 'V' + y; cv = v; }
+      lastT = t;
+    }
+    if (cs) o[cs] += 'H' + fx(X(lastT));
+    return o;
+  }
+  function runs(t0, t1, pred) {
+    var o = [], a = null;
+    for (var t = t0; t <= t1; t++) { var p = pred(t); if (p && a === null) a = t; if (!p && a !== null) { o.push([a, t]); a = null; } }
+    if (a !== null) o.push([a, t1]);
+    return o;
+  }
+  var CACHE = {};
+  function view(c) {
+    var key = [c.range, c.offset, c.fc ? 1 : 0, c.W, c.fH, c.rH, c.oH, c.cap ? 1 : 0].join('|');
+    if (CACHE[key]) return CACHE[key];
+    var span = SPAN[c.range], t1 = NOW - c.offset, t0 = t1 - span, fc = !!c.fc && c.offset === 0;
+    var tE = fc ? t1 + Math.round(span / 4) : t1, W = c.W, tN = Math.min(t1, NOW);
+    var X = function (t) { return (t - t0) / (tE - t0) * W; };
+    var v = { key: key, t0: t0, t1: t1, tE: tE, tN: tN, span: span, fc: fc, X: X, W: W, offset: c.offset, range: c.range };
+    var i, t, a, b, k;
+    var mn = 99, mx = -99, mxh = -99;
+    for (t = t0; t <= tN; t++) {
+      i = t - SIM0; a = S.flow[i]; b = S.tgt[i]; var w = S.st[i] === 'W';
+      if (a < mn) mn = a; if (a > mx) mx = a; if (!w && a > mxh) mxh = a;
+      if (b === b) { if (b < mn) mn = b; if (b > mx) mx = b; if (!w && b > mxh) mxh = b; }
+    }
+    if (fc) { mx = Math.max(mx, 42); mxh = Math.max(mxh, 42); }
+    var top = c.cap ? mxh : mx, lo = Math.floor((mn - 1) / 5) * 5, hi = Math.ceil((top + 1) / 5) * 5;
+    if (hi - lo < 15) lo = hi - 15;
+    var fst = hi - lo > 25 ? 10 : 5, fH = c.fH;
+    var Yf = function (x) { return 6 + (hi - x) / (hi - lo) * (fH - 10); };
+    v.Yf = Yf; v.flo = lo; v.fhi = hi; v.fGrid = ''; v.fTicks = [];
+    for (a = lo; a <= hi; a += fst) { var gy = Math.round(Yf(a)) + 0.5; v.fGrid += 'M0 ' + gy + 'H' + W; v.fTicks.push({ y: gy, v: a, label: a + '°' }); }
+    v.flow = line(S.flow, t0, tN, X, Yf, W * 1.5);
+    v.ret = line(S.ret, t0, tN, X, Yf, W * 1.5);
+    var tg = tsteps(t0, tN, X, Yf); v.tH = tg.H; v.tA = tg.A; v.tW = tg.W;
+    var rmn = 99, rmx = -99, rtl = t0, rth = t0, smn = 99, smx = -99;
+    for (t = t0; t <= tN; t++) { a = S.room[t - SIM0]; if (a < rmn) { rmn = a; rtl = t; } if (a > rmx) { rmx = a; rth = t; } }
+    for (t = t0; t <= tE; t += 5) { a = setAt(t, DEF); if (a < smn) smn = a; if (a > smx) smx = a; }
+    var rlo = Math.min(rmn, smn) - 0.3, rhi = Math.max(rmx, smx) + 0.3, rH = c.rH;
+    var Yr = function (x) { return 5 + (rhi - x) / (rhi - rlo) * (rH - 10); };
+    v.Yr = Yr; v.rlo = rlo; v.rhi = rhi;
+    v.room = line(S.room, t0, tN, X, Yr, W);
+    v.roomA = v.room ? v.room + 'L' + fx(X(tN)) + ' ' + rH + 'L' + fx(X(t0)) + ' ' + rH + 'Z' : '';
+    v.set = steps(t0, tN, X, Yr, function (t) { return setAt(t, DEF); });
+    v.rMin = { x: fx(X(rtl)), y: fx(Yr(rmn)), v: rmn, t: rtl, label: f1(rmn) + '°' };
+    v.rMax = { x: fx(X(rth)), y: fx(Yr(rmx)), v: rmx, t: rth, label: f1(rmx) + '°' };
+    var omn = 99, omx = -99, otl = t0, oth = t0;
+    for (t = t0; t <= tN; t++) { a = S.out[t - SIM0]; if (a < omn) { omn = a; otl = t; } if (a > omx) { omx = a; oth = t; } }
+    var dmn = omn, dmx = omx;
+    for (t = tN; t <= tE; t++) { a = S.out[t - SIM0]; if (a < dmn) dmn = a; if (a > dmx) dmx = a; }
+    var olo = dmn - 0.8, ohi = dmx + 0.8, oH = c.oH;
+    var Yo = function (x) { return 5 + (ohi - x) / (ohi - olo) * (oH - 10); };
+    v.Yo = Yo; v.olo = olo; v.ohi = ohi;
+    v.out = line(S.out, t0, tN, X, Yo, W);
+    v.outA = v.out ? v.out + 'L' + fx(X(tN)) + ' ' + oH + 'L' + fx(X(t0)) + ' ' + oH + 'Z' : '';
+    v.outF = fc ? line(S.out, tN, tE, X, Yo, W) : '';
+    v.oMin = { x: fx(X(otl)), y: fx(Yo(omn)), v: omn, t: otl, label: f1(omn) + '°' };
+    v.oMax = { x: fx(X(oth)), y: fx(Yo(omx)), v: omx, t: oth, label: f1(omx) + '°' };
+    var band = function (r) { var x0 = X(r[0]), x1 = X(r[1]); return { x: fx(x0), w: fx(x1 - x0), a: r[0], b: r[1] }; };
+    v.nights = runs(t0, tE, function (t) { return sched(t) === 'night'; }).map(band);
+    v.days = runs(t0, tE, function (t) { return sched(t) === 'day'; }).map(band);
+    v.suns = runs(t0, tE, sunUp).map(band);
+    var segs = [], cur = null, bsegs = [], bc = null;
+    for (t = t0; t < tN; t++) {
+      i = t - SIM0; k = S.dfr[i] ? 'D' : S.st[i];
+      if (cur && cur.k === k) cur.b = t + 1; else { if (cur) segs.push(cur); cur = { k: k, a: t, b: t + 1 }; }
+      var kb = S.st[i];
+      if (bc && bc.k === kb) bc.b = t + 1; else { if (bc) bsegs.push(bc); bc = { k: kb, a: t, b: t + 1 }; }
+    }
+    if (cur) segs.push(cur); if (bc) bsegs.push(bc);
+    v.segs = segs.map(function (g) { var x0 = X(g.a), x1 = X(g.b); return { k: g.k, a: g.a, b: g.b, x: fx(x0), w: fx(Math.max(x1 - x0, g.k === 'D' ? 2.5 : 1)) }; });
+    v.bsegs = bsegs;
+    var nD = 0, mW = 0, nW = 0, mA = 0, mH = 0, mP = 0, lastD = null, sumD = 0;
+    segs.forEach(function (g) { if (g.k === 'D') { nD++; sumD += g.b - g.a; lastD = g.a; } });
+    bsegs.forEach(function (g) { var d = g.b - g.a; if (g.k === 'W') { mW += d; nW++; } else if (g.k === 'A') mA += d; else if (g.k === 'H') mH += d; else mP += d; });
+    var tot = Math.max(1, tN - t0);
+    v.stats = { defrosts: nD, defrostAvg: nD ? Math.round(sumD / nD) : 0, lastDefrost: lastD, dhwMin: mW, dhwRuns: nW, atMin: mA, heatMin: mH, pauseMin: mP, total: tot, atPct: Math.round(mA / tot * 100), heatPct: Math.round(mH / tot * 100) };
+    v.present = { H: mH > 0, A: mA > 0, W: mW > 0, P: mP > 0, D: nD > 0 };
+    var sp = tE - t0, xs = sp <= 200 ? 30 : sp <= 420 ? 60 : sp <= 900 ? 120 : sp <= 1800 ? 240 : 720;
+    v.xt = [];
+    for (t = Math.ceil(t0 / xs) * xs; t <= tE; t += xs) {
+      var xx = X(t); if (xx < 14 || xx > W - 14) continue;
+      var mid = md(t) === 0;
+      v.xt.push({ x: fx(xx), t: t, label: mid ? DAYS[wd(t)] + ' ' + (8 + di(t)) : hr(t), fw: mid ? 700 : 500 });
+    }
+    v.changes = CHANGES.filter(function (ch) { return ch.t >= t0 && ch.t <= tN; }).map(function (ch) { return { x: fx(X(ch.t)), t: ch.t, label: ch.label, text: ch.label + ' ' + ch.from + ' → ' + ch.to, from: ch.from, to: ch.to, when: when(ch.t) }; });
+    v.nowX = fx(X(NOW));
+    v.label = c.offset === 0 ? LONG[c.range] : rangeLabel(t0, t1);
+    v.short = c.offset === 0 ? 'Last ' + c.range : rangeLabel(t0, t1);
+    CACHE[key] = v;
+    return v;
+  }
+  function rangeLabel(a, b) { return di(a) === di(b) ? DAYS[wd(a)] + ' ' + hm(a) + ' – ' + hm(b) : DAYS[wd(a)] + ' ' + hm(a) + ' – ' + DAYS[wd(b)] + ' ' + hm(b); }
+  function ctxNow(s) { return { out: S.out[NOW - SIM0], room: S.room[NOW - SIM0], set: setAt(NOW, s), atTemp: modeAt(NOW) === 'A' }; }
+  function curveAt(s, out) { return 20 + s.shift + s.slope * 1.6133 * (20 - out); }
+  function breakdown(s, ctx) {
+    ctx = ctx || ctxNow(s);
+    var curve = curveAt(s, ctx.out), roomC = -s.roomK * (ctx.room - ctx.set), sb = ctx.atTemp ? -s.setback : 0;
+    var raw = curve + roomC + sb, target = Math.ceil(raw - 1e-6), rnd = target - raw;
+    return { curve: curve, room: roomC, setback: sb, round: rnd, raw: raw, target: target, out: ctx.out, set: ctx.set, roomT: ctx.room, atTemp: ctx.atTemp, curveTxt: f1(curve), roomTxt: sg(roomC), setbackTxt: sb ? sg(sb) : '–', roundTxt: sg(rnd), targetTxt: String(target) };
+  }
+  function fcTarget(t, s) { return breakdown(s, { out: S.out[t - SIM0], room: S.room[NOW - SIM0], set: setAt(t, s), atTemp: false }).target; }
+  function fcPaths(v, s) {
+    if (!v.fc) return { tgt: '', set: '' };
+    return { tgt: steps(NOW, v.tE, v.X, v.Yf, function (t) { return fcTarget(t, s); }), set: steps(NOW, v.tE, v.X, v.Yr, function (t) { return setAt(t, s); }) };
+  }
+  function sinceOf(t, base, dfr) {
+    var a = t, k = 0;
+    if (dfr) { while (k++ < 60 && S.dfr[a - 1 - SIM0] === 1) a--; return a; }
+    while (k++ < 4320 && modeAt(a - 1) === base) a--;
+    return a;
+  }
+  function nextSched(t, s) {
+    var cur = sched(t);
+    for (var k = 1; k <= 1440; k++) { var nx = sched(t + k); if (nx !== cur) { var tp = nx === 'day' ? s.day : s.night; return { t: t + k, kind: nx, temp: tp, label: (nx === 'day' ? 'Day ' : 'Night ') + f1(tp) + '° at ' + hm(t + k) }; } }
+    return null;
+  }
+  function readout(t, s) {
+    var live = t === null || t === undefined; if (live) t = NOW;
+    var i = t - SIM0, past = t <= NOW, base = modeAt(t), dfr = past && S.dfr[i] === 1, ss = (live || !past) ? s : DEF;
+    var r = { t: t, live: live, past: past, base: base, mode: dfr ? 'D' : base, sched: sched(t), sun: sunUp(t), out: S.out[i], set: setAt(t, ss) };
+    if (past) { r.flow = S.flow[i]; r.ret = S.ret[i]; r.room = S.room[i]; r.target = S.tgt[i]; }
+    else { r.flow = NaN; r.ret = NaN; r.room = NaN; r.target = fcTarget(t, s); }
+    if (live && (base === 'H' || base === 'A')) r.target = breakdown(s).target;
+    r.dT = r.flow - r.ret; r.dFlow = r.flow - r.target; r.dRoom = r.room - r.set;
+    r.since = sinceOf(t, base, dfr); r.next = nextSched(t, ss);
+    r.time = hm(t); r.when = when(t); r.hh = hh(t);
+    r.change = null;
+    for (var k = 0; k < CHANGES.length; k++) if (Math.abs(CHANGES[k].t - t) <= 8) r.change = CHANGES[k].label + ' ' + CHANGES[k].from + ' → ' + CHANGES[k].to;
+    r.flowTxt = r.flow === r.flow ? f1(r.flow) + '°' : '–';
+    r.retTxt = r.ret === r.ret ? f1(r.ret) + '°' : '–';
+    r.dTTxt = r.dT === r.dT ? f1(r.dT) + '°' : '–';
+    r.roomTxt = r.room === r.room ? f1(r.room) + '°' : '–';
+    r.outTxt = f1(r.out) + '°';
+    r.setTxt = f1(r.set) + '°';
+    r.tgtTxt = r.target === r.target ? r.target + '°' : '–';
+    var df = r.dFlow, dr = r.dRoom;
+    r.flowCmp = r.target !== r.target ? (r.mode === 'P' ? 'Paused · no target' : '') : (Math.abs(df) < 0.05 ? 'On target ' + r.tgtTxt : f1(Math.abs(df)) + '° ' + (df < 0 ? 'below' : 'above') + ' target ' + r.tgtTxt);
+    r.roomCmp = dr !== dr ? '' : (Math.abs(dr) < 0.05 ? 'On its ' + r.setTxt + ' setting' : f1(Math.abs(dr)) + '° ' + (dr > 0 ? 'above' : 'below') + ' set ' + r.setTxt);
+    r.schedName = r.sched === 'day' ? 'Day' : 'Night';
+    r.modeName = r.mode === 'A' ? 'At temperature' : NAMES[r.mode] === 'Defrost' ? 'Defrosting' : NAMES[r.mode];
+    return r;
+  }
+  function describe(r, s) {
+    var d = r.dRoom, sl = r.sched === 'day' ? 'day' : 'night';
+    var roomTxt = d !== d ? '' : (Math.abs(d) < 0.05 ? 'Room right on its ' + f1(r.set) + '° ' + sl + ' setting' : 'Room ' + f1(Math.abs(d)) + '° ' + (d > 0 ? 'over' : 'under') + ' its ' + f1(r.set) + '° ' + sl + ' setting');
+    var since = r.since, sinceTxt = 'since ' + (di(since) === di(r.t) ? hm(since) : when(since));
+    switch (r.mode) {
+      case 'A': return { title: 'At temperature', sub: 'Water ' + s.setback + '° cooler until the room’s below ' + f1(r.set - 0.1) + '°', since: sinceTxt };
+      case 'W': return { title: 'Heating hot water', sub: 'Tank heating, water up to 56°', since: sinceTxt };
+      case 'P': return { title: 'Paused', sub: roomTxt, since: sinceTxt };
+      case 'D': return { title: 'Defrosting', sub: 'Melting ice off the outdoor unit, back in a few minutes', since: sinceTxt };
+      default: return { title: 'Heating', sub: roomTxt, since: sinceTxt };
+    }
+  }
+  var CTRL = [
+    { k: 'slope', label: 'Weather curve', short: 'Curve', hint: 'How much hotter the water runs as it gets colder outside', step: 0.1, min: 0.2, max: 2.5, d: 1, unit: '', grp: 'Weather compensation' },
+    { k: 'shift', label: 'Curve shift', short: 'Shift', hint: 'Lifts or lowers the whole curve', step: 1, min: -10, max: 15, d: 0, unit: ' °C', grp: 'Weather compensation' },
+    { k: 'roomK', label: 'Room correction', short: 'Room', hint: 'Trims the water when the room is off its setting', step: 0.1, min: 0, max: 3, d: 1, unit: '', grp: 'Room' },
+    { k: 'setback', label: 'Setback', short: 'Setback', hint: 'Water this much cooler once the room is at temperature', step: 0.5, min: 0, max: 10, d: -1, unit: ' °C', grp: 'Room' },
+    { k: 'day', label: 'Day temperature', short: 'Day', hint: 'Room setting during day periods', step: 0.1, min: 15, max: 25, d: 1, unit: ' °C', grp: 'Schedule' },
+    { k: 'night', label: 'Night temperature', short: 'Night', hint: 'Room setting the rest of the time', step: 0.1, min: 12, max: 23, d: 1, unit: ' °C', grp: 'Schedule' }
+  ];
+  function fmtNum(c, v) { return c.d === -1 ? (Math.round(v * 10) % 10 ? v.toFixed(1) : String(Math.round(v))) : v.toFixed(c.d); }
+  function fmtCtrl(c, v) { return fmtNum(c, v) + c.unit; }
+  function stepVal(c, v, dir) { var n = Math.round((v + dir * c.step) / c.step) * c.step; n = Math.max(c.min, Math.min(c.max, n)); return Math.round(n * 100) / 100; }
+  function copy(o) { var r = {}; for (var k in o) r[k] = o[k]; return r; }
+  function same(a, b) { for (var k in DEF) if (Math.abs(a[k] - b[k]) > 1e-9) return false; return true; }
+  function changed(a, b) { return CTRL.filter(function (c) { return Math.abs(a[c.k] - b[c.k]) > 1e-9; }); }
+  return { NOW: NOW, SIM0: SIM0, MAXBACK: MAXBACK, SPAN: SPAN, RANGES: RANGES, DEF: DEF, NAMES: NAMES, CTRL: CTRL, S: S, view: view, readout: readout, describe: describe, breakdown: breakdown, ctxNow: ctxNow, curveAt: curveAt, fcPaths: fcPaths, stepVal: stepVal, fmtCtrl: fmtCtrl, fmtNum: fmtNum, copy: copy, same: same, changed: changed, line: line, steps: steps, fx: fx, f1: f1, sg: sg, hm: hm, hr: hr, hh: hh, when: when, dur: dur, sched: sched, setAt: setAt, modeAt: modeAt };
+})();
+
+var IC = {
+  sliders: 'M4 7h9M17 7h3M4 17h3M11 17h9M17 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM11 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z',
+  list: 'M4 6.5h.01M8 6.5h12M4 12h.01M8 12h12M4 17.5h.01M8 17.5h12',
+  chevL: 'M15 18l-6-6 6-6', chevR: 'M9 18l6-6-6-6',
+  x: 'M6 6l12 12M18 6L6 18',
+  now: 'M5 12h10M11 7l5 5-5 5M19 6v12',
+  check: 'M5 12.5l4.2 4.2L19 7',
+  plus: 'M12 5v14M5 12h14', minus: 'M5 12h14',
+  sun: 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2.5v2M12 19.5v2M4.6 4.6L6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4',
+  moon: 'M20 14.6A8 8 0 1 1 9.4 4a6.3 6.3 0 0 0 10.6 10.6z'
+};
+var PAL = { H: '#EB6F2A', A: '#139E79', W: '#8250EE', D: '#1FA4E0', P: '#B8C0CC' };
+var HALO = { H: '#FDE6D8', A: '#D3F1E6', W: '#E8E0FD', D: '#D6EEF9', P: '#EEF1F5' };
+var MNAME = { H: 'Heating', A: 'At temperature', W: 'Hot water', D: 'Defrost', P: 'Paused' };
+var RWORDS = { '3h': '3 hours', '6h': '6 hours', '12h': '12 hours', '24h': '24 hours', '3d': '3 days' };
+function sparkOf(arr, t0, t1, w, h) {
+  var mn = 99, mx = -99;
+  for (var t = t0; t <= t1; t++) { var a = arr[t - HP.SIM0]; if (a < mn) mn = a; if (a > mx) mx = a; }
+  var X = function (t) { return (t - t0) / ((t1 - t0) || 1) * w; }, Y = function (x) { return 2 + (mx - x) / ((mx - mn) || 1) * (h - 4); };
+  return { d: HP.line(arr, t0, t1, X, Y, w), X: X, Y: Y };
+}
+function gridOf(lo, hi, Y, W) {
+  var span = hi - lo, st = span > 12 ? 5 : span > 5 ? 2 : 1, grid = '', ticks = [];
+  for (var a = Math.ceil(lo / st) * st; a <= hi; a += st) { var y = Math.round(Y(a)) + 0.5; if (y < 8 || y > 186) continue; grid += 'M0 ' + y + 'H' + W; ticks.push({ y: y, label: a + '°' }); }
+  return { grid: grid, ticks: ticks };
+}
+function dotLabel(p, H, W, above, c) {
+  var lx = Math.max(16, Math.min(W - 30, p.x)), ly, tf = 'translateX(-50%)';
+  if (above && p.y < 18) { ly = p.y - 6; lx = p.x > 60 ? p.x - 9 : p.x + 9; tf = p.x > 60 ? 'translateX(-100%)' : 'none'; }
+  else if (!above && p.y > H - 18) { ly = p.y - 6; lx = p.x > 60 ? p.x - 9 : p.x + 9; tf = p.x > 60 ? 'translateX(-100%)' : 'none'; }
+  else ly = above ? p.y - 18 : p.y + 6;
+  return { x: p.x, y: p.y, lx: HP.fx(lx), ly: HP.fx(ly), tf: tf, label: p.label, c: c };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var p = props || {}, view = p.view || 'live';
+    var demo = HP.copy(HP.DEF); demo.slope = 0.8; demo.night = 20;
+    this.state = { tab: p.tab || 'flow', range: '12h', offset: 0, scrub: view === 'inspect' ? (parseInt(p.at, 10) || 820) : null, ret: false, chg: true, fc: false, adj: view === 'adjust', keyOpen: view === 'key', draft: view === 'adjust' ? demo : null, saved: HP.copy(HP.DEF), mine: [], toast: '' };
+    this.onScrub = this.onScrub.bind(this);
+  }
+  componentWillUnmount() { if (this._tt) clearTimeout(this._tt); }
+  onScrub(e) {
+    var el = e.currentTarget, v = this._v; if (!el || !v) return;
+    var r = el.getBoundingClientRect(); if (!r.width) return;
+    var f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    var t = Math.min(Math.round(v.t0 + f * (v.tE - v.t0)), v.fc ? v.tE : v.tN);
+    if (t !== this.state.scrub) this.setState({ scrub: t });
+  }
+  pick(rg) {
+    var s = this.state, span = HP.SPAN[rg], off = Math.max(0, Math.min(s.offset, HP.MAXBACK - span)), sc = s.scrub;
+    if (sc !== null && (sc < HP.NOW - off - span || sc > HP.NOW - off)) sc = null;
+    this.setState({ range: rg, offset: off, scrub: sc });
+  }
+  pan(dir) {
+    var s = this.state, span = HP.SPAN[s.range];
+    var off = dir < 0 ? Math.min(s.offset + span, HP.MAXBACK - span) : Math.max(0, s.offset - span);
+    this.setState({ offset: off, scrub: null });
+  }
+  setCtrl(c, val) { var d = HP.copy(this.state.draft || this.state.saved); d[c.k] = Math.max(c.min, Math.min(c.max, Math.round(val * 100) / 100)); this.setState({ draft: d }); }
+  save() {
+    var s = this.state, d = s.draft; if (!d) return;
+    var ch = HP.changed(d, s.saved), self = this;
+    var mine = s.mine.concat(ch.map(function (c) { return { t: HP.NOW, text: c.label + ' ' + HP.fmtCtrl(c, s.saved[c.k]) + ' → ' + HP.fmtCtrl(c, d[c.k]) }; }));
+    this.setState({ saved: d, draft: null, adj: false, mine: mine, toast: 'Saved. Flow target is now ' + HP.breakdown(d).target + '°' });
+    if (this._tt) clearTimeout(this._tt);
+    this._tt = setTimeout(function () { self.setState({ toast: '' }); }, 3200);
+  }
+  renderVals() {
+    var s = this.state, self = this, W = 356, H = 190;
+    var v = HP.view({ range: s.range, offset: s.offset, fc: s.fc, W: W, fH: H, rH: H, oH: H });
+    this._v = v;
+    var insp = s.scrub !== null && s.scrub !== undefined;
+    var live = HP.readout(null, s.saved), rd = insp ? HP.readout(s.scrub, s.saved) : live;
+    var d = HP.describe(live, s.saved), fp = HP.fcPaths(v, s.saved), ok = function (x) { return x === x; };
+    var tc = PAL[rd.base === 'W' ? 'W' : rd.base === 'A' ? 'A' : 'H'];
+    var tN = v.tN, t0 = v.t0;
+    var sp = { flow: sparkOf(HP.S.flow, t0, tN, 88, 20), room: sparkOf(HP.S.room, t0, tN, 88, 20), out: sparkOf(HP.S.out, t0, tN, 88, 20) };
+    var tdefs = [
+      { k: 'flow', label: 'Flow', value: rd.flowTxt, sub: 'target ' + rd.tgtTxt, arr: HP.S.flow, c: '#1E3FAE' },
+      { k: 'room', label: 'Room', value: rd.roomTxt, sub: 'set ' + rd.setTxt, arr: HP.S.room, c: '#24324A' },
+      { k: 'out', label: 'Outside', value: rd.outTxt, sub: '↑' + v.oMax.label + '  ↓' + v.oMin.label, arr: HP.S.out, c: '#0E9384' }
+    ];
+    var tiles = tdefs.map(function (t) {
+      var on = s.tab === t.k, spx = sp[t.k], inRange = insp && rd.t <= tN && ok(t.arr[rd.t - HP.SIM0]);
+      return { label: t.label, value: t.value, sub: t.sub, on: on, bg: on ? '#0B1220' : '#F3F5F9', fg: on ? '#FFFFFF' : '#0B1220', lc: on ? '#AAB6C8' : '#4A5567', sc: on ? '#FFFFFF' : t.c, spark: spx.d, dx: inRange ? HP.fx(spx.X(rd.t)) : -20, dy: inRange ? HP.fx(spx.Y(t.arr[rd.t - HP.SIM0])) : -20, dop: inRange ? 1 : 0, pick: function () { self.setState({ tab: t.k }); } };
+    });
+    var p, keys, title, bandList, bandBg = '#F1EFFC', bandFg = '#6D5FC7', bandLabel = 'Night', dots = [], cdots = [];
+    var cx = insp ? HP.fx(v.X(rd.t)) : -40;
+    if (s.tab === 'flow') {
+      title = 'Flow';
+      keys = [{ label: 'Flow', c: '#1E3FAE', ls: 'solid' }, { label: 'Target', c: tc, ls: 'solid' }];
+      if (s.ret) keys.push({ label: 'Return', c: '#9DB0E8', ls: 'solid' });
+      p = { grid: v.fGrid, area: '', areaC: '#000000', areaO: 0, ticks: v.fTicks, lines: [
+        { d: s.ret ? v.ret : '', c: '#9DB0E8', w: 1.5, da: 'none' },
+        { d: v.tA, c: PAL.A, w: 2, da: 'none' }, { d: v.tH, c: PAL.H, w: 2, da: 'none' }, { d: v.tW, c: PAL.W, w: 2, da: '5 3' },
+        { d: fp.tgt, c: PAL.H, w: 2, da: '1 4' }, { d: v.flow, c: '#1E3FAE', w: 1.75, da: 'none' }] };
+      if (insp && ok(rd.target)) cdots.push({ x: cx, y: HP.fx(v.Yf(rd.target)), c: tc });
+      if (insp && ok(rd.flow)) cdots.push({ x: cx, y: HP.fx(v.Yf(rd.flow)), c: '#1E3FAE' });
+      bandList = v.nights;
+    } else if (s.tab === 'room') {
+      title = 'Room';
+      keys = [{ label: 'Room', c: '#24324A', ls: 'solid' }, { label: 'Setting', c: '#94A3B8', ls: 'dashed' }];
+      var gr = gridOf(v.rlo, v.rhi, v.Yr, W);
+      p = { grid: gr.grid, area: v.roomA, areaC: '#24324A', areaO: 0.06, ticks: gr.ticks, lines: [
+        { d: v.set, c: '#94A3B8', w: 1.75, da: '5 4' }, { d: fp.set, c: '#94A3B8', w: 1.75, da: '1 4' }, { d: v.room, c: '#24324A', w: 2, da: 'none' }] };
+      dots = [dotLabel(v.rMax, H, W, true, '#24324A'), dotLabel(v.rMin, H, W, false, '#24324A')];
+      if (insp && ok(rd.room)) cdots.push({ x: cx, y: HP.fx(v.Yr(rd.room)), c: '#24324A' });
+      bandList = v.nights;
+    } else {
+      title = 'Outside';
+      keys = [{ label: 'Outside', c: '#0E9384', ls: 'solid' }];
+      if (v.fc) keys.push({ label: 'Forecast', c: '#0E9384', ls: 'dotted' });
+      var go = gridOf(v.olo, v.ohi, v.Yo, W);
+      p = { grid: go.grid, area: v.outA, areaC: '#0E9384', areaO: 0.1, ticks: go.ticks, lines: [{ d: v.outF, c: '#0E9384', w: 2, da: '1 4' }, { d: v.out, c: '#0E9384', w: 2, da: 'none' }] };
+      dots = [dotLabel(v.oMax, H, W, true, '#0E9384'), dotLabel(v.oMin, H, W, false, '#0E9384')];
+      cdots.push({ x: cx, y: HP.fx(v.Yo(rd.out)), c: '#0E9384' });
+      if (!insp) cdots = [];
+      bandList = v.suns; bandBg = '#FFF5D6'; bandFg = '#A16A00'; bandLabel = 'Daylight';
+    }
+    p.dots = dots;
+    for (var li = 0; li < 6; li++) { var ln = p.lines[li] || { d: '', c: '#000000', w: 1, da: 'none' }; if (!ln.d) ln.d = 'M0 0'; p['l' + li] = ln; }
+    var bands = bandList.map(function (b) { return { x: b.x, w: b.w, lop: b.w > 56 ? 1 : 0 }; });
+    var chg = [];
+    if (s.chg && s.tab === 'flow') {
+      chg = v.changes.map(function (c) { return { x: c.x, text: c.when + ' · ' + c.text }; });
+      if (v.offset === 0) s.mine.forEach(function (m) { chg.push({ x: HP.fx(v.X(m.t)) - 8, text: 'Just now · ' + m.text }); });
+    }
+    var segs = v.segs.filter(function (g) { return g.k !== 'D'; }).concat(v.segs.filter(function (g) { return g.k === 'D'; })).map(function (g) { return { x: g.x, w: g.w, c: PAL[g.k] }; });
+    var st = v.stats, lead = v.offset === 0 ? 'In the last ' + RWORDS[s.range] : v.label;
+    var dfx = st.defrosts === 0 ? 'No defrosts' : st.defrosts + (st.defrosts === 1 ? ' defrost' : ' defrosts') + ', about ' + st.defrostAvg + ' min each';
+    var dhw = st.dhwRuns === 0 ? 'no hot-water runs' : st.dhwRuns === 1 ? 'one ' + HP.dur(st.dhwMin) + ' hot-water run' : st.dhwRuns + ' hot-water runs (' + HP.dur(st.dhwMin) + ')';
+    var summary = lead + ' it heated ' + st.heatPct + '% of the time and sat at temperature ' + st.atPct + '%. ' + dfx + ', and ' + dhw + '.';
+    var layers = [{ label: 'Return', key: 'ret', beta: false }, { label: 'Setting changes', key: 'chg', beta: false }, { label: 'Forecast', key: 'fc', beta: true }].map(function (y) {
+      var on = !!s[y.key];
+      return { label: y.label, beta: y.beta, on: on, icon: on ? IC.check : IC.plus, bg: on ? '#E6ECFF' : '#F3F5F9', fg: on ? '#1E3FAE' : '#4A5567', toggle: function () { var o = {}; o[y.key] = !self.state[y.key]; self.setState(o); } };
+    });
+    var keyLines = [
+      { label: 'Flow (water leaving the heat pump)', c: '#1E3FAE', ls: 'solid', val: rd.flowTxt },
+      { label: 'Return (water coming back)', c: '#9DB0E8', ls: 'solid', val: rd.retTxt },
+      { label: 'Difference, flow minus return', c: '#CBD3DF', ls: 'solid', val: rd.dTTxt },
+      { label: 'Target while heating', c: PAL.H, ls: 'solid', val: rd.base === 'H' ? rd.tgtTxt : '' },
+      { label: 'Target once at temperature', c: PAL.A, ls: 'solid', val: rd.base === 'A' ? rd.tgtTxt : '' },
+      { label: 'Target for hot water', c: PAL.W, ls: 'dashed', val: rd.base === 'W' ? rd.tgtTxt : '' },
+      { label: 'Room', c: '#24324A', ls: 'solid', val: rd.roomTxt },
+      { label: 'Room setting', c: '#94A3B8', ls: 'dashed', val: rd.setTxt },
+      { label: 'Outside', c: '#0E9384', ls: 'solid', val: rd.outTxt }
+    ];
+    var keyModes = ['H', 'A', 'W', 'D', 'P'].map(function (k) { var on = rd.mode === k; return { label: MNAME[k], c: PAL[k], bg: on ? '#EEF1F5' : '#F8F9FB', fw: on ? 800 : 600 }; });
+    var draft = s.draft || s.saved, bdNow = HP.breakdown(s.saved), bdNew = HP.breakdown(draft), dirty = !!s.adj && !HP.same(draft, s.saved);
+    var cmf = [HP.CTRL[4], HP.CTRL[5]].map(function (c) {
+      var val = draft[c.k], ch = Math.abs(val - s.saved[c.k]) > 1e-9, active = live.sched === (c.k === 'day' ? 'day' : 'night');
+      return { label: c.k === 'day' ? 'Day' : 'Night', icon: c.k === 'day' ? IC.sun : IC.moon, val: HP.f1(val) + '°', active: active, bg: active ? '#EEF1F5' : '#F7F8FA', ring: ch ? 'inset 0 0 0 2px #1E3FAE' : 'none', fg: ch ? '#1E3FAE' : '#0B1220', dec: function () { self.setCtrl(c, HP.stepVal(c, (self.state.draft || self.state.saved)[c.k], -1)); }, inc: function () { self.setCtrl(c, HP.stepVal(c, (self.state.draft || self.state.saved)[c.k], 1)); } };
+    });
+    var rc = function (a, b) { return dirty && a !== b ? '#0B1220' : '#4A5567'; };
+    var receipt = [
+      { label: 'Weather curve at ' + HP.f1(bdNow.out) + '° outside', now: bdNow.curveTxt, nw: bdNew.curveTxt, nc: rc(bdNow.curveTxt, bdNew.curveTxt) },
+      { label: 'Room is ' + HP.f1(Math.abs(bdNow.roomT - bdNow.set)) + '° ' + (bdNow.roomT > bdNow.set ? 'warm' : 'cool') + ' of its setting', now: bdNow.roomTxt, nw: bdNew.roomTxt, nc: rc(bdNow.roomTxt, bdNew.roomTxt) },
+      { label: bdNow.atTemp ? 'Setback (at temperature)' : 'Setback (not at temperature yet)', now: bdNow.setbackTxt, nw: bdNew.setbackTxt, nc: '#4A5567' },
+      { label: 'Rounded up to a whole degree', now: bdNow.roundTxt, nw: bdNew.roundTxt, nc: '#4A5567' }
+    ];
+    var sliders = [HP.CTRL[0], HP.CTRL[1], HP.CTRL[2], HP.CTRL[3]].map(function (c) {
+      var val = draft[c.k], ch = Math.abs(val - s.saved[c.k]) > 1e-9;
+      return { id: 'b-' + c.k, label: c.label, hint: ch ? 'Was ' + HP.fmtCtrl(c, s.saved[c.k]) + ' · ' + c.hint : c.hint, val: HP.fmtCtrl(c, val), fg: ch ? '#1E3FAE' : '#0B1220', min: c.min, max: c.max, step: c.step, v: val, onChange: function (e) { self.setCtrl(c, parseFloat(e.target.value)); } };
+    });
+    var nx = live.next;
+    return {
+      ic: IC,
+      st: d, stColor: PAL[live.mode], stHalo: HALO[live.mode],
+      openKey: function () { self.setState({ keyOpen: true }); }, closeKey: function () { self.setState({ keyOpen: false }); },
+      openAdj: function () { self.setState({ adj: true, draft: HP.copy(self.state.saved) }); },
+      closeAdj: function () { self.setState({ adj: false, draft: null }); },
+      reset: function () { self.setState({ draft: HP.copy(HP.DEF) }); },
+      save: function () { self.save(); },
+      tiles: tiles, chartTitle: title, keys: keys,
+      insp: insp, notInsp: !insp, rd: rd, winShort: v.label,
+      clear: function () { self.setState({ scrub: null }); },
+      bands: bands, bandBg: bandBg, bandFg: bandFg, bandLabel: bandLabel,
+      fcOn: v.fc, nowX: v.nowX, p: p, chg: chg,
+      cur: { x: cx, op: insp ? 1 : 0, dots: cdots },
+      segs: segs, xt: v.xt, onScrub: this.onScrub,
+      ranges: HP.RANGES.map(function (r) { var on = r === s.range; return { label: r, on: on, bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#0B1220' : '#4A5567', sh: on ? '0 1px 3px rgba(11,18,32,0.14)' : 'none', pick: function () { self.pick(r); } }; }),
+      back: function () { self.pan(-1); },
+      fwd: function () { if (self.state.offset > 0) self.pan(1); },
+      fwdLabel: s.offset > 0 ? 'Later' : 'Already showing now',
+      fwdBg: s.offset > 0 ? '#E6ECFF' : '#F3F5F9', fwdFg: s.offset > 0 ? '#1E3FAE' : '#AAB6C8', fwdIcon: IC.chevR,
+      summary: summary, layers: layers,
+      hasToast: !!s.toast, toast: s.toast,
+      keyOpen: !!s.keyOpen, keyLines: keyLines, keyModes: keyModes, nightSet: HP.f1(s.saved.night) + '°', daySet: HP.f1(s.saved.day) + '°',
+      adj: !!s.adj, comfort: cmf,
+      schedNote: (live.sched === 'day' ? 'Day period now.' : 'Night period now.') + (nx ? ' ' + (nx.kind === 'day' ? 'Day' : 'Night') + ' starts at ' + HP.hm(nx.t) + '.' : ''),
+      receipt: receipt, bdNow: bdNow, bdNew: bdNew, newOp: dirty ? 1 : 0, totNowC: dirty ? '#64748B' : '#0B1220',
+      sliders: sliders, dirty: dirty, notDirty: !dirty,
+      saveBg: dirty ? '#0B1220' : '#EEF1F5', saveFg: dirty ? '#FFFFFF' : '#AAB6C8', saveLabel: dirty ? 'Save · target ' + bdNew.target + '°' : 'Save'
+    };
+  }
+}
+</script>
+</body>
+</html>

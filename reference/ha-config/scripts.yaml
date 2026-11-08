@@ -1,0 +1,441 @@
+# grant_set_dhw_target:
+#   alias: "Grant - Set DHW Target Temperature"
+#   description: "Sends DHW target to hub, waits, then force re-polls sensor"
+#   #   mode: restart
+#   fields:
+#     value:
+#       description: "Target temperature in °C (35–65)"
+#       example: 50
+#       required: true
+#       selector:
+#         number:
+#           min: 35
+#           max: 65
+#           unit_of_measurement: "°C"
+#   sequence:
+#     - action: rest_command.grant_set_dhw_target
+#       data:
+#         value: "{{ value | int }}"
+#     - delay: "00:00:02"
+#     - action: homeassistant.update_entity
+#       target:
+#         entity_id: sensor.dhw_target_temp_setting
+#     - repeat:
+#         while:
+#           - condition: template
+#             value_template: >
+#               {{ states('sensor.dhw_target_temp_setting') | int != value | int
+#                  and repeat.index <= 30 }}
+#         sequence:
+#           - delay: "00:00:01"
+
+# grant_set_daytemp_target:
+#   alias: "Grant - Set Day Temperature"
+#   description: "Sends Day Temp to hub, waits, then force re-polls sensor"
+#   fields:
+#     value:
+#       description: "Target temperature in °C"
+#       example: 22.1
+#       required: true
+#       selector:
+#         number:
+#           min: 14
+#           max: 25
+#           unit_of_measurement: "°C"
+#   sequence:
+#     - action: rest_command.grant_set_c1_comfort_temp
+#       data:
+#         value: "{{ value | float }}"
+#     - delay: "00:00:02"
+#     - action: homeassistant.update_entity
+#       target:
+#         entity_id: sensor.circuit_1_comfort_day_temp
+#     - repeat:
+#         while:
+#           - condition: template
+#             value_template: >
+#               {{ states('sensor.circuit_1_comfort_day_temp') | float != value | float
+#                  and repeat.index <= 30 }}
+#         sequence:
+#           - delay: "00:00:01"
+
+# grant_set_weather_curve:
+#   alias: "Grant - Set Weather Comp Curve"
+#   description: "Sends Weather Compensation Curve to hub, waits, then force re-polls sensor"
+#   fields:
+#     value:
+#       description: "Curve multiplier factor (0.0 to 4.0)"
+#       example: 0.7
+#       required: true
+#       selector:
+#         number:
+#           min: 0.0
+#           max: 4.0
+#           step: 0.1
+#   sequence:
+#     - action: rest_command.grant_set_weather_curve
+#       data:
+#         value: "{{ value | float | round(1) }}"
+#     - delay: "00:00:02"
+#     - action: homeassistant.update_entity
+#       target:
+#         entity_id: sensor.weather_comp_curve
+#     - repeat:
+#         while:
+#           - condition: template
+#             value_template: >
+#               {{ states('sensor.weather_comp_curve') | float | round(1) != value | float | round(1)
+#                  and repeat.index <= 30 }}
+#         sequence:
+#           - delay: "00:00:01"
+
+# grant_set_curve_shift:
+#   alias: "Grant - Set Curve Shift"
+#   description: "Sends Curve Parallel Shift to hub, waits, then force re-polls sensor"
+#   fields:
+#     value:
+#       description: "Parallel offset value in °C (-20 to +20)"
+#       example: 4
+#       required: true
+#       selector:
+#         number:
+#           min: -20
+#           max: 20
+#           step: 1
+#           unit_of_measurement: "°C"
+#   sequence:
+#     - action: rest_command.grant_set_curve_shift
+#       data:
+#         value: "{{ value | int }}"
+#     - delay: "00:00:02"
+#     - action: homeassistant.update_entity
+#       target:
+#         entity_id: sensor.curve_shift
+#     - repeat:
+#         while:
+#           - condition: template
+#             value_template: >
+#               {{ states('sensor.curve_shift') | int != value | int
+#                  and repeat.index <= 30 }}
+#         sequence:
+#           - delay: "00:00:01"
+
+# grant_set_room_temp_correction:
+#   alias: "Grant - Set Room Temp Correction"
+#   description: "Sends Room Temperature Correction multiplier to hub, waits, then force re-polls sensor"
+#   fields:
+#     value:
+#       description: "Correction factor multiplier (0.0 to 10.0)"
+#       example: 3.5
+#       required: true
+#       selector:
+#         number:
+#           min: 0.0
+#           max: 10.0
+#           step: 0.1
+#   sequence:
+#     - action: rest_command.grant_set_room_temp_correction
+#       data:
+#         value: "{{ value | float | round(1) }}"
+#     - delay: "00:00:02"
+#     - action: homeassistant.update_entity
+#       target:
+#         entity_id: sensor.room_temperature_correction
+#     - repeat:
+#         while:
+#           - condition: template
+#             value_template: >
+#               {{ states('sensor.room_temperature_correction') | float | round(1) != value | float | round(1)
+#                  and repeat.index <= 30 }}
+#         sequence:
+#           - delay: "00:00:01"
+
+# grant_dhw_boost:
+#   alias: "Grant - DHW Boost"
+#   description: "Starts (1) or cancels (0) a one-off DHW reheat, then re-polls the status"
+#   mode: restart
+#   fields:
+#     value:
+#       description: "1 = start boost, 0 = cancel boost"
+#       example: 1
+#       required: true
+#       selector:
+#         number:
+#           min: 0
+#           max: 1
+#           step: 1
+#   sequence:
+#     - action: rest_command.grant_set_dhw_boost
+#       data:
+#         value: "{{ value | int }}"
+#     - delay: "00:00:02"
+#     - action: homeassistant.update_entity
+#       target:
+#         entity_id: sensor.dhw_boost_status
+
+# Grant Aerona HP290: scripts that change settings on the ecoNET300 hub
+# ======================================================================
+# This replaces the Grant scripts in your scripts file (all six you sent me), and adds two new ones
+# (night temperature and setback). Same names, same fields, same rest commands, so nothing that uses
+# them needs changing. If the file has other scripts too, keep those.
+#
+# Each one works the same way:
+#   1. send the value to the hub (your rest command),
+#   2. wait 2 seconds,
+#   3. ask the hub for a fresh reading, wait 2 seconds and check it, and keep doing that until the hub
+#      reports the new value or about 30 seconds have passed.
+#
+# (The boost script stays as it was: its status can flip back as soon as the tank is hot, so waiting for it
+# could leave your Hot Water card saying "Sending…" for half a minute.)
+#
+# Compared with the earlier versions:
+#   - they ask the hub again each time round, so they finish as soon as it has the value (usually 2–4 s),
+#     rather than waiting for the sensor's next 30-second poll;
+#   - both sides are rounded the same way before comparing, and a reading that's briefly 'unavailable'
+#     just counts as "not yet" instead of stopping the script with an error;
+#   - mode: restart, so if you change a value again while one is still waiting, the latest value is
+#     sent (in the default mode the second change would be ignored).
+
+grant_set_dhw_target:
+  alias: "Grant - Set DHW Target Temperature"
+  description: "Sends the hot water target to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Target temperature in °C (35–65)"
+      example: 50
+      required: true
+      selector:
+        number:
+          min: 35
+          max: 65
+          unit_of_measurement: "°C"
+  sequence:
+    - action: rest_command.grant_set_dhw_target
+      data:
+        value: "{{ value | int }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.dhw_target_temp_setting
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.dhw_target_temp_setting') %}
+              {{ (s | is_number and s | float | round(0) == value | float | round(0)) or repeat.index >= 15 }}
+
+grant_set_daytemp_target:
+  alias: "Grant - Set Day Temperature"
+  description: "Sends the day temperature to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Target temperature in °C"
+      example: 22.1
+      required: true
+      selector:
+        number:
+          min: 14
+          max: 25
+          step: 0.1
+          unit_of_measurement: "°C"
+  sequence:
+    - action: rest_command.grant_set_c1_comfort_temp
+      data:
+        value: "{{ value | float | round(1) }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.circuit_1_comfort_day_temp
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.circuit_1_comfort_day_temp') %}
+              {{ (s | is_number and s | float | round(1) == value | float | round(1)) or repeat.index >= 15 }}
+
+grant_set_nighttemp_target:
+  alias: "Grant - Set Night Temperature"
+  description: "Sends the night temperature to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Night room temperature in °C"
+      example: 19.0
+      required: true
+      selector:
+        number:
+          min: 10
+          max: 25
+          step: 0.1
+          unit_of_measurement: "°C"
+  sequence:
+    - action: rest_command.grant_set_c1_eco_temp
+      data:
+        value: "{{ value | float | round(1) }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.circuit_1_eco_night_temp
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.circuit_1_eco_night_temp') %}
+              {{ (s | is_number and s | float | round(1) == value | float | round(1)) or repeat.index >= 15 }}
+
+grant_set_weather_curve:
+  alias: "Grant - Set Weather Comp Curve"
+  description: "Sends the weather compensation curve to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Curve multiplier factor (0.0 to 4.0)"
+      example: 0.7
+      required: true
+      selector:
+        number:
+          min: 0.0
+          max: 4.0
+          step: 0.1
+  sequence:
+    - action: rest_command.grant_set_weather_curve
+      data:
+        value: "{{ value | float | round(1) }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.weather_comp_curve
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.weather_comp_curve') %}
+              {{ (s | is_number and s | float | round(1) == value | float | round(1)) or repeat.index >= 15 }}
+
+grant_set_curve_shift:
+  alias: "Grant - Set Curve Shift"
+  description: "Sends the curve shift to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Parallel offset value in °C (-20 to +20)"
+      example: 4
+      required: true
+      selector:
+        number:
+          min: -20
+          max: 20
+          step: 1
+          unit_of_measurement: "°C"
+  sequence:
+    - action: rest_command.grant_set_curve_shift
+      data:
+        value: "{{ value | int }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.curve_shift
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.curve_shift') %}
+              {{ (s | is_number and s | float | round(0) == value | float | round(0)) or repeat.index >= 15 }}
+
+grant_set_room_temp_correction:
+  alias: "Grant - Set Room Temp Correction"
+  description: "Sends the room temperature correction to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Correction factor multiplier (0.0 to 10.0)"
+      example: 3.5
+      required: true
+      selector:
+        number:
+          min: 0.0
+          max: 10.0
+          step: 0.1
+  sequence:
+    - action: rest_command.grant_set_room_temp_correction
+      data:
+        value: "{{ value | float | round(1) }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.room_temperature_correction
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.room_temperature_correction') %}
+              {{ (s | is_number and s | float | round(1) == value | float | round(1)) or repeat.index >= 15 }}
+
+grant_set_temp_reduction:
+  alias: "Grant - Set Temp Reduction (setback)"
+  description: "Sends the setback (how far the water drops once the room is at temp) to the hub, then re-reads it until the hub reports it"
+  mode: restart
+  fields:
+    value:
+      description: "Setback in °C (0–20)"
+      example: 3
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 20
+          step: 1
+          unit_of_measurement: "°C"
+  sequence:
+    - action: rest_command.grant_set_temp_reduction
+      data:
+        value: "{{ value | int }}"
+    - delay: "00:00:02"
+    - repeat:
+        sequence:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.circuit_1_temp_reduction
+          - delay: "00:00:02"
+        until:
+          - condition: template
+            value_template: >
+              {% set s = states('sensor.circuit_1_temp_reduction') %}
+              {{ (s | is_number and s | float | round(0) == value | float | round(0)) or repeat.index >= 15 }}
+
+grant_dhw_boost:
+  alias: "Grant - DHW Boost"
+  description: "Starts (1) or cancels (0) a one-off hot water reheat, then re-polls the status (unchanged, apart from tidying)"
+  mode: restart
+  fields:
+    value:
+      description: "1 = start boost, 0 = cancel boost"
+      example: 1
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 1
+          step: 1
+  sequence:
+    - action: rest_command.grant_set_dhw_boost
+      data:
+        value: "{{ value | int }}"
+    - delay: "00:00:02"
+    - action: homeassistant.update_entity
+      target:
+        entity_id: sensor.dhw_boost_status

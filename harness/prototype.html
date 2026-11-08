@@ -1,0 +1,121 @@
+<title>Heat Pump History</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>
+/* Layout: the card at phone width on a dashboard-grey ground; the guide beside it on wide screens, under it on phones */
+:root {
+  --bg: #eceef2;
+  --fg: #1d1f23;
+  --sub: #5a606a;
+  --line: rgba(29, 31, 35, 0.12);
+  --card: #ffffff;
+  --accent: #3a5fc4;
+  --font: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Home Assistant's theme variables, which the card reads */
+  --primary-text-color: var(--fg);
+  --secondary-text-color: var(--sub);
+  --divider-color: var(--line);
+  --card-background-color: var(--card);
+  --primary-color: #03a9f4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #111214; --fg: #e4e5e8; --sub: #9ca2ab; --line: rgba(228, 229, 232, 0.12); --card: #1c1d20; --accent: #8ea8f2; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #111214; --fg: #e4e5e8; --sub: #9ca2ab; --line: rgba(228, 229, 232, 0.12); --card: #1c1d20; --accent: #8ea8f2; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+.page { max-width: 880px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+.intro { display: grid; gap: 6px; max-width: 62ch; }
+.eyebrow { margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+.lede { margin: 0; font-size: 15px; line-height: 1.5; color: var(--sub); }
+.lede b { color: var(--fg); font-weight: 500; }
+.grid { display: grid; gap: 28px; align-items: start; }
+@media (min-width: 840px) { .grid { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 40px; } .guide { padding-top: 4px; } }
+.cardcol { min-width: 0; }
+.guide { min-width: 0; display: grid; gap: 10px; font-size: 14.5px; line-height: 1.5; max-width: 62ch; }
+.guide h2 { margin: 10px 0 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sub); }
+.guide h2:first-child { margin-top: 0; }
+.guide ol, .guide ul { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.guide li::marker { color: var(--sub); font-variant-numeric: tabular-nums; }
+.guide b { font-weight: 500; }
+.guide p { margin: 0; }
+.note { color: var(--sub); }
+.reset { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--sub); font-size: 13.5px; }
+#reset { font: inherit; font-weight: 500; color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 18px; height: 36px; padding: 0 14px; cursor: pointer; }
+#reset:hover { background: var(--line); }
+#reset:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <p class="eyebrow">Prototype · best tried on your phone</p>
+    <h1>Heat pump history</h1>
+    <p class="lede">The new card running on your heat pump's real readings from <b id="range">Thu 5 to Sun 8 Nov</b>. The recording ends at <b id="end">Sun 18:20</b>, so the card treats that moment as now.</p>
+  </header>
+  <main class="grid">
+    <section class="cardcol" aria-label="Heat pump history card">
+      <heat-pump-history-card id="card"></heat-pump-history-card>
+    </section>
+    <aside class="guide">
+      <h2>Try this</h2>
+      <ol>
+        <li><b>Find yesterday at 14:00</b> and see what the heat pump was doing.</li>
+        <li><b>Zoom in on a single defrost</b>, one of the blue ticks in the heat pump lane.</li>
+        <li><b>Get back to now.</b></li>
+        <li>At each step, <b>say which stretch of time is on screen</b> before checking the title.</li>
+      </ol>
+      <h2>More to try</h2>
+      <ul>
+        <li>Under Graphs &amp; layers, switch the lane to <b>Power strip</b>, add the <b>Power</b> or <b>Hot water tank</b> graph, or show <b>Hot water at full scale</b>.</li>
+        <li>Tap a block in the heat pump lane for its times, energy and COP.</li>
+        <li>Tap a diamond under the lane to see what setting changed.</li>
+        <li>Tap the title for Today, Yesterday, the last 7 days or a date.</li>
+        <li>Drag the shaded part of the day row to move, or its ends to zoom.</li>
+      </ul>
+      <h2>Not here yet</h2>
+      <p class="note">Tune (the target recipe, the weather curve and changing settings), the Days view, the forecast and compare come next. At 3 and 7 days the water lines will turn into a band so they're easier to read.</p>
+      <div class="reset"><span>Your zoom and layer choices are remembered in this browser.</span><button id="reset" type="button">Start over</button></div>
+    </aside>
+  </main>
+</div>
+
+<script type="application/json" id="fixture">/*FIXTURE*/</script>
+<script>/*FAKE*/</script>
+<script>/*CARD*/</script>
+<script>
+(() => {
+  const fix = JSON.parse(document.getElementById('fixture').textContent);
+  const isDark = () => {
+    const t = document.documentElement.getAttribute('data-theme');
+    return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+  const { hass, start, end } = makeFakeHass(fix, { dark: isDark(), latency: 220 });
+  const wd = t => new Intl.DateTimeFormat('en-GB', { weekday: 'short' }).format(t);
+  const hm = t => new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(t);
+  const dm = t => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(t);
+  document.getElementById('range').textContent = `${wd(start)} ${new Date(start).getDate()} to ${wd(end)} ${dm(end)}`;
+  document.getElementById('end').textContent = `${wd(end)} ${hm(end)}`;
+
+  let card = document.getElementById('card'), cur = hass;
+  const boot = el => {
+    el.setConfig({ hours: 12 });
+    // the recording stops at its last reading, so the card's clock stays there
+    Object.defineProperty(el, 'clockOffset', { configurable: true, get: () => end - Date.now() });
+    el.hass = cur;
+  };
+  boot(card);
+  const retheme = () => { cur = { ...cur, themes: { darkMode: isDark() } }; card.hass = cur; };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+  new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  document.getElementById('reset').addEventListener('click', () => {
+    try { Object.keys(localStorage).filter(k => k.startsWith('hp-history:')).forEach(k => localStorage.removeItem(k)); } catch (e) { /* storage blocked */ }
+    const fresh = document.createElement('heat-pump-history-card');
+    card.replaceWith(fresh);
+    card = fresh;
+    boot(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+})();
+</script>

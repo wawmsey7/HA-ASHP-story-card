@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heat pump history · harness</title>
+<style>
+  :root { --primary-text-color:#212121; --secondary-text-color:#727272; --divider-color:rgba(0,0,0,.12); --card-background-color:#fff;
+    --primary-color:#03a9f4; --primary-background-color:#f2f3f5; }
+  :root.dark { --primary-text-color:#e1e1e1; --secondary-text-color:#9b9b9b; --divider-color:rgba(225,225,225,.12); --card-background-color:#1c1c1c;
+    --primary-background-color:#111; }
+  body { margin:0; background:var(--primary-background-color); font-family:Roboto, system-ui, sans-serif; color:var(--primary-text-color); }
+  main { max-width:var(--w, 460px); margin:0 auto; padding:8px; }
+</style>
+<script src="fake-hass.js"></script>
+<script src="../dist/heat-pump-history-card.js"></script>
+</head>
+<body>
+<main><heat-pump-history-card id="card"></heat-pump-history-card></main>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const dark = q.get('dark') === '1';
+  if (dark) document.documentElement.classList.add('dark');
+  if (q.get('w')) document.documentElement.style.setProperty('--w', q.get('w') + 'px');
+  if (q.get('fresh') === '1') localStorage.clear();
+  const fix = await (await fetch('../fixture/history.json')).json();
+  const { hass, end } = makeFakeHass(fix, { dark, h12: q.get('h12') === '1', latency: Number(q.get('lat') || 250), log: s => console.log('service', s) });
+  const card = document.getElementById('card');
+  card.setConfig(JSON.parse(q.get('config') || '{}'));
+  card.clockOffset = end - Date.now();
+  card.hass = hass;
+  window.__hass = hass;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>D · Instrument heat pump card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:420px; height:860px; box-sizing:border-box; padding:16px; background:#07090C; font-family:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; color:#E6EAF0;">
+<div style="position:relative; width:388px; box-sizing:border-box; padding:10px 16px 12px; background:#10141A; border:1px solid #1D232C; border-radius:16px; overflow:hidden;">
+
+  <div style="display:flex; align-items:center; gap:8px; height:44px;">
+    <span style="width:8px; height:8px; flex:none; border-radius:4px; background:{{stC}}; box-shadow:0 0 0 3px {{stHalo}};"></span>
+    <span style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12.5px; font-weight:600; letter-spacing:0.08em; white-space:nowrap;">{{stTitle}}</span>
+    <sc-if value="{{notInsp}}" hint-placeholder-val="{{ true }}"><span style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; color:#7D8796; white-space:nowrap;">{{stSince}}</span></sc-if>
+    <div style="flex:1;"></div>
+    <sc-if value="{{insp}}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{clear}}" aria-label="Stop inspecting" style="height:26px; display:flex; align-items:center; gap:5px; padding:0 7px 0 9px; border:0; border-radius:6px; background:#E6EAF0; color:#10141A; font:600 11px 'IBM Plex Mono', ui-monospace, monospace; cursor:pointer; white-space:nowrap;">
+        @ {{rd.hhd}} · {{rdMode}}
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="{{ic.x}}"></path></svg>
+      </button>
+    </sc-if>
+    <sc-if value="{{notInsp}}" hint-placeholder-val="{{ true }}">
+      <span style="height:26px; display:inline-flex; align-items:center; gap:6px; padding:0 8px; border-radius:6px; border:1px solid {{liveBd}}; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10.5px; font-weight:600; letter-spacing:0.08em; color:{{liveFg}}; box-sizing:border-box; white-space:nowrap;"><span style="width:6px; height:6px; border-radius:3px; background:{{liveFg}};"></span>{{liveTxt}}</span>
+    </sc-if>
+    <button onClick="{{openAdj}}" aria-label="Adjust heating" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:1px solid #2A313B; border-radius:10px; background:#161B22; color:#E6EAF0; cursor:pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.sliders}}"></path></svg>
+    </button>
+  </div>
+  <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; line-height:1.5; color:#A9B2C0; margin-top:2px; text-wrap:pretty;">{{stLine}}</div>
+
+  <div style="display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:1px; margin-top:10px; background:#1D232C; border:1px solid #1D232C; border-radius:10px; overflow:hidden;">
+    <sc-for list="{{cells}}" as="c" hint-placeholder-count="8">
+      <div style="background:#10141A; padding:7px 9px 6px; min-height:56px; box-sizing:border-box;">
+        <div style="display:flex; align-items:center; gap:5px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; letter-spacing:0.08em; color:#7D8796; white-space:nowrap;"><span style="width:9px; height:0; border-top:2px {{c.ls}} {{c.c}};"></span>{{c.label}}</div>
+        <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:18px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums; white-space:nowrap;">{{c.value}}</div>
+        <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; color:{{c.dc}}; margin-top:1px; white-space:nowrap;">{{c.delta}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:6px; margin-top:12px;">
+    <div role="group" aria-label="Time range" style="flex:1; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); border:1px solid #2A313B; border-radius:10px; overflow:hidden;">
+      <sc-for list="{{ranges}}" as="r" hint-placeholder-count="5">
+        <button onClick="{{r.pick}}" aria-pressed="{{r.on}}" style="height:42px; border:0; border-right:{{r.br}}; background:{{r.bg}}; color:{{r.fg}}; font:600 12px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.06em; cursor:pointer;">{{r.label}}</button>
+      </sc-for>
+    </div>
+    <button aria-label="Earlier" onClick="{{back}}" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:1px solid #2A313B; border-radius:10px; background:#161B22; color:#E6EAF0; cursor:pointer;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.chevL}}"></path></svg>
+    </button>
+    <button aria-label="Later" onClick="{{fwd}}" disabled="{{atNow}}" style="width:44px; height:44px; flex:none; display:flex; align-items:center; justify-content:center; border:1px solid #2A313B; border-radius:10px; background:#161B22; color:#E6EAF0; opacity:{{fwdOp}}; cursor:pointer;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.chevR}}"></path></svg>
+    </button>
+  </div>
+  <div style="display:flex; align-items:center; justify-content:space-between; height:28px; margin-top:6px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; letter-spacing:0.04em; color:#A9B2C0;">
+    <span>{{winTxt}}</span>
+    <sc-if value="{{panned}}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{toNow}}" style="height:26px; display:flex; align-items:center; gap:5px; padding:0 8px; border:1px solid #2A313B; border-radius:6px; background:none; color:#E6EAF0; font:600 10.5px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.06em; cursor:pointer;">
+        NOW
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.now}}"></path></svg>
+      </button>
+    </sc-if>
+  </div>
+
+  <div style="position:relative; margin-top:4px;">
+    <div style="display:flex; height:150px;">
+      <div style="position:relative; width:38px; flex:none;">
+        <sc-for list="{{fTicks}}" as="k" hint-placeholder-count="5"><div style="position:absolute; right:6px; top:{{k.y}}px; transform:translateY(-50%); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10px; line-height:12px; color:#7D8796;">{{k.v}}</div></sc-for>
+      </div>
+      <div style="position:relative; width:318px; flex:none; background:#0D1116;">
+        <sc-for list="{{dhw}}" as="b" hint-placeholder-count="1"><div style="position:absolute; top:0; bottom:0; left:{{b.x}}px; width:{{b.w}}px; background:rgba(141,107,234,0.14);"><span style="position:absolute; top:3px; left:3px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; letter-spacing:0.06em; color:#B9A6F5; opacity:{{b.lop}};">DHW</span></div></sc-for>
+        <sc-if value="{{fcOn}}" hint-placeholder-val="{{ false }}"><div style="position:absolute; top:0; bottom:0; left:{{nowX}}px; right:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 4px, transparent 4px 8px); border-left:1px solid #3A4250;"><span style="position:absolute; top:3px; left:4px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; letter-spacing:0.06em; color:#A9B2C0;">FCST</span></div></sc-if>
+        <svg width="318" height="150" viewBox="0 0 318 150" style="position:absolute; left:0; top:0;" aria-hidden="true">
+          <path d="{{fGrid}}" fill="none" stroke="#1C222B" stroke-width="1"></path>
+          <path d="{{dtBand}}" fill="#3F8CF2" fill-opacity="0.13" stroke="none"></path>
+          <path d="{{retP}}" fill="none" stroke="#2D64B0" stroke-width="1.25" stroke-linejoin="round"></path>
+          <path d="{{tA}}" fill="none" stroke="#24A874" stroke-width="1.75" stroke-linejoin="round"></path>
+          <path d="{{tH}}" fill="none" stroke="#D9782F" stroke-width="1.75" stroke-linejoin="round"></path>
+          <path d="{{tW}}" fill="none" stroke="#8D6BEA" stroke-width="1.75" stroke-dasharray="4 3" stroke-linejoin="round"></path>
+          <path d="{{fcT}}" fill="none" stroke="#D9782F" stroke-width="1.75" stroke-dasharray="1 4" stroke-linecap="round"></path>
+          <path d="{{flowP}}" fill="none" stroke="#3F8CF2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></path>
+        </svg>
+        <div style="position:absolute; left:6px; bottom:4px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; letter-spacing:0.08em; color:#7D8796;">FLOW °C</div>
+        <sc-for list="{{chg}}" as="c" hint-placeholder-count="1">
+          <div style="position:absolute; top:0; bottom:0; left:{{c.x}}px; width:0; border-left:1px dotted #A9B2C0;"></div>
+          <div title="{{c.text}}" style="position:absolute; top:-1px; left:{{c.x}}px; width:8px; height:8px; margin-left:-4px; transform:rotate(45deg); background:#E6EAF0; box-shadow:0 0 0 2px #0D1116;"></div>
+        </sc-for>
+        <div style="position:absolute; left:{{cur.x}}px; top:{{cur.yT}}px; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:{{tColor}}; box-shadow:0 0 0 2px #0D1116; opacity:{{cur.opT}};"></div>
+        <div style="position:absolute; left:{{cur.x}}px; top:{{cur.yF}}px; width:8px; height:8px; margin:-4px 0 0 -4px; border-radius:50%; background:#3F8CF2; box-shadow:0 0 0 2px #0D1116; opacity:{{cur.opF}};"></div>
+        <div style="position:absolute; left:{{cur.x}}px; top:{{cur.yRt}}px; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:#2D64B0; box-shadow:0 0 0 2px #0D1116; opacity:{{cur.opRt}};"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; height:54px; margin-top:6px;">
+      <div style="width:38px; flex:none; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; letter-spacing:0.08em; color:#7D8796; padding-top:4px;">ROOM</div>
+      <div style="position:relative; width:318px; flex:none; background:#0D1116;">
+        <svg width="318" height="54" viewBox="0 0 318 54" style="position:absolute; left:0; top:0;" aria-hidden="true">
+          <path d="{{roomA}}" fill="#E6EAF0" fill-opacity="0.05" stroke="none"></path>
+          <path d="{{setP}}" fill="none" stroke="#7D8796" stroke-width="1.25" stroke-dasharray="4 3"></path>
+          <path d="{{fcSet}}" fill="none" stroke="#7D8796" stroke-width="1.25" stroke-dasharray="1 3" stroke-linecap="round"></path>
+          <path d="{{roomP}}" fill="none" stroke="#E6EAF0" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></path>
+        </svg>
+        <sc-for list="{{rDots}}" as="m" hint-placeholder-count="2">
+          <div style="position:absolute; left:{{m.x}}px; top:{{m.y}}px; width:6px; height:6px; margin:-3px 0 0 -3px; border-radius:50%; background:#E6EAF0; box-shadow:0 0 0 2px #0D1116;"></div>
+          <div style="position:absolute; left:{{m.lx}}px; top:{{m.ly}}px; transform:{{m.tf}}; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; line-height:12px; color:#E6EAF0; white-space:nowrap;">{{m.label}}</div>
+        </sc-for>
+        <div style="position:absolute; left:{{cur.x}}px; top:{{cur.yR}}px; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:#E6EAF0; box-shadow:0 0 0 2px #0D1116; opacity:{{cur.opR}};"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; height:46px; margin-top:6px;">
+      <div style="width:38px; flex:none; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; letter-spacing:0.08em; color:#7D8796; padding-top:4px;">OUT</div>
+      <div style="position:relative; width:318px; flex:none; background:#0D1116;">
+        <svg width="318" height="46" viewBox="0 0 318 46" style="position:absolute; left:0; top:0;" aria-hidden="true">
+          <path d="{{outA}}" fill="#2DBFA5" fill-opacity="0.12" stroke="none"></path>
+          <path d="{{outF}}" fill="none" stroke="#2DBFA5" stroke-width="1.6" stroke-dasharray="1 4" stroke-linecap="round"></path>
+          <path d="{{outP}}" fill="none" stroke="#2DBFA5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></path>
+        </svg>
+        <sc-for list="{{oDots}}" as="m" hint-placeholder-count="2">
+          <div style="position:absolute; left:{{m.x}}px; top:{{m.y}}px; width:6px; height:6px; margin:-3px 0 0 -3px; border-radius:50%; background:#2DBFA5; box-shadow:0 0 0 2px #0D1116;"></div>
+          <div style="position:absolute; left:{{m.lx}}px; top:{{m.ly}}px; transform:{{m.tf}}; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; line-height:12px; color:#7FE0CE; white-space:nowrap;">{{m.label}}</div>
+        </sc-for>
+        <div style="position:absolute; left:{{cur.x}}px; top:{{cur.yO}}px; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:#2DBFA5; box-shadow:0 0 0 2px #0D1116; opacity:{{cur.op}};"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; height:16px; margin-top:10px;">
+      <div style="width:38px; flex:none; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; line-height:16px; letter-spacing:0.08em; color:#7D8796;">SCHED</div>
+      <div style="position:relative; width:318px; flex:none; border-radius:3px; overflow:hidden; background:#161B22;">
+        <sc-for list="{{lane}}" as="g" hint-placeholder-count="3"><div style="position:absolute; top:0; bottom:0; left:{{g.x}}px; width:{{g.w}}px; background:{{g.bg}}; box-shadow:0 0 0 1px #10141A; display:flex; align-items:center; overflow:hidden;"><span style="padding-left:5px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; letter-spacing:0.06em; color:{{g.fg}}; white-space:nowrap; opacity:{{g.lop}};">{{g.label}}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:flex; height:16px; margin-top:4px;">
+      <div style="width:38px; flex:none; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; line-height:16px; letter-spacing:0.08em; color:#7D8796;">MODE</div>
+      <div style="position:relative; width:318px; flex:none; border-radius:3px; overflow:hidden; background:#161B22;">
+        <sc-for list="{{segs}}" as="g" hint-placeholder-count="6"><div style="position:absolute; top:0; bottom:0; left:{{g.x}}px; width:{{g.w}}px; background:{{g.c}}; box-shadow:0 0 0 1px #10141A; display:flex; align-items:center; overflow:hidden;"><span style="padding-left:4px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; font-weight:600; letter-spacing:0.04em; color:{{g.fg}}; white-space:nowrap; opacity:{{g.lop}};">{{g.label}}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:flex; height:16px; margin-top:4px;">
+      <div style="width:38px; flex:none; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; line-height:16px; letter-spacing:0.08em; color:#7D8796;">SUN</div>
+      <div style="position:relative; width:318px; flex:none; border-radius:3px; overflow:hidden; background:{{sunBg}};">
+        <sc-for list="{{sunMarks}}" as="m" hint-placeholder-count="2"><span style="position:absolute; top:0; left:{{m.x}}px; transform:{{m.tf}}; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9px; line-height:16px; color:#F6E3A8; white-space:nowrap; padding:0 4px;">{{m.label}}</span></sc-for>
+      </div>
+    </div>
+
+    <div style="position:relative; height:16px; margin-top:6px; margin-left:38px; width:318px;">
+      <sc-for list="{{xt}}" as="x" hint-placeholder-count="5"><div style="position:absolute; left:{{x.x}}px; top:0; transform:translateX(-50%); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10px; line-height:16px; color:{{x.c}}; white-space:nowrap;">{{x.label}}</div></sc-for>
+      <div style="position:absolute; top:0; left:{{cur.x}}px; transform:translateX(-50%); height:16px; padding:0 5px; border-radius:4px; background:#E6EAF0; color:#10141A; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10px; font-weight:600; line-height:16px; opacity:{{cur.op}}; white-space:nowrap;">{{rd.hh}}</div>
+    </div>
+
+    <div style="position:absolute; top:0; left:{{cur.lx}}px; width:1px; height:330px; background:#E6EAF0; opacity:{{cur.opL}}; pointer-events:none;"></div>
+    <div onPointerDown="{{onScrub}}" onPointerMove="{{onScrub}}" aria-label="Chart area. Drag to inspect a moment." style="position:absolute; left:38px; width:318px; top:0; height:330px; cursor:crosshair; touch-action:pan-y;"></div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:0 6px; margin-top:8px;">
+    <sc-for list="{{layers}}" as="y" hint-placeholder-count="3">
+      <button onClick="{{y.toggle}}" aria-pressed="{{y.on}}" style="height:44px; display:flex; align-items:center; padding:0; border:0; background:none; cursor:pointer;">
+        <span style="height:28px; display:inline-flex; align-items:center; gap:6px; padding:0 9px; border-radius:6px; border:1px solid {{y.bd}}; background:{{y.bg}}; color:{{y.fg}}; font:600 10.5px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.06em; box-sizing:border-box;">
+          <span style="width:10px; height:10px; border-radius:2px; border:1.5px solid currentColor; display:flex; align-items:center; justify-content:center; box-sizing:border-box;"><span style="width:4px; height:4px; border-radius:1px; background:currentColor; opacity:{{y.dot}};"></span></span>
+          {{y.label}}
+        </span>
+      </button>
+    </sc-for>
+  </div>
+  <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10.5px; line-height:1.6; letter-spacing:0.03em; color:#A9B2C0;">{{statLine}}</div>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:absolute; left:16px; right:16px; bottom:14px; display:flex; align-items:center; gap:8px; padding:11px 12px; border-radius:10px; background:#E6EAF0; color:#10141A; font:600 11.5px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.02em;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1C7C55" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ic.check}}"></path></svg>
+      {{toast}}
+    </div>
+  </sc-if>
+
+  <sc-if value="{{adj}}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-label="Adjust heating" style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; background:#10141A;">
+      <div style="display:flex; align-items:center; gap:8px; padding:10px 8px 6px 16px; flex:none;">
+        <span style="flex:1; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12.5px; font-weight:600; letter-spacing:0.1em;">ADJUST HEATING</span>
+        <button onClick="{{closeAdj}}" aria-label="Close" style="width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #2A313B; border-radius:10px; background:#161B22; color:#E6EAF0; cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="{{ic.x}}"></path></svg>
+        </button>
+      </div>
+      <div style="flex:1; min-height:0; overflow:auto; padding:6px 16px 12px;">
+        <div style="border:1px solid #1D232C; border-radius:10px; padding:12px 10px 10px; background:#0D1116;">
+          <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; letter-spacing:0.08em; color:#7D8796; margin-bottom:8px;">FLOW TARGET = CURVE + ROOM + SETBACK, ROUNDED UP</div>
+          <div style="display:grid; grid-template-columns:30px repeat(4, minmax(0, 1fr)) 12px minmax(0, 1fr); align-items:baseline; row-gap:6px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums;">
+            <span></span>
+            <sc-for list="{{eqHead}}" as="h" hint-placeholder-count="6"><span style="font-size:9px; letter-spacing:0.06em; color:#7D8796; text-align:right;">{{h}}</span></sc-for>
+            <span style="font-size:9.5px; letter-spacing:0.06em; color:#7D8796;">NOW</span>
+            <sc-for list="{{eqNow}}" as="e" hint-placeholder-count="6"><span style="font-size:{{e.fs}}px; text-align:right; color:{{e.c}};">{{e.v}}</span></sc-for>
+            <span style="font-size:9.5px; letter-spacing:0.06em; color:#7D8796;">NEW</span>
+            <sc-for list="{{eqNew}}" as="e" hint-placeholder-count="6"><span style="font-size:{{e.fs}}px; text-align:right; color:{{e.c}};">{{e.v}}</span></sc-for>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:10px;">
+          <sc-for list="{{tilesA}}" as="c" hint-placeholder-count="6">
+            <div style="border-radius:10px; padding:10px 10px 8px; background:#161B22; box-shadow:{{c.ring}};">
+              <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; letter-spacing:0.08em; color:#A9B2C0; white-space:nowrap;">{{c.label}}</div>
+              <div style="display:flex; align-items:baseline; gap:6px; margin-top:4px;">
+                <span style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:22px; font-weight:500; color:{{c.fg}}; font-variant-numeric:tabular-nums;">{{c.val}}</span>
+                <span style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10px; color:#7D8796;">{{c.unit}}</span>
+              </div>
+              <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:9.5px; color:{{c.nc}}; margin-top:2px; height:13px; white-space:nowrap;">{{c.note}}</div>
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <button onClick="{{c.dec}}" aria-label="Decrease {{c.name}}" style="flex:1; height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #2A313B; border-radius:8px; background:#10141A; color:#E6EAF0; cursor:pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{ic.minus}}"></path></svg>
+                </button>
+                <button onClick="{{c.inc}}" aria-label="Increase {{c.name}}" style="flex:1; height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #2A313B; border-radius:8px; background:#10141A; color:#E6EAF0; cursor:pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>
+                </button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; padding:10px 16px 14px; border-top:1px solid #1D232C; flex:none;">
+        <button onClick="{{reset}}" style="height:44px; padding:0 12px; border:1px solid #2A313B; border-radius:10px; background:none; color:#A9B2C0; font:600 11px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.08em; cursor:pointer;">RESET</button>
+        <span style="flex:1;"></span>
+        <button onClick="{{closeAdj}}" style="height:44px; padding:0 14px; border:1px solid #2A313B; border-radius:10px; background:#161B22; color:#E6EAF0; font:600 11px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.08em; cursor:pointer;">CANCEL</button>
+        <button onClick="{{save}}" disabled="{{notDirty}}" style="height:44px; padding:0 16px; border:0; border-radius:10px; background:{{saveBg}}; color:{{saveFg}}; font:600 11px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.08em; cursor:pointer;">{{saveLabel}}</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["live","inspect","adjust"],"default":"live"},"at":{"editor":"int","default":520,"min":230,"max":950},"$preview":{"width":420,"height":860}}'>
+var HP = (function () {
+  var NOW = 950, SIM0 = -9300, SIMN = NOW + 360 - SIM0 + 1, MAXBACK = 10080;
+  var SPAN = { '3h': 180, '6h': 360, '12h': 720, '24h': 1440, '3d': 4320 };
+  var RANGES = ['3h', '6h', '12h', '24h', '3d'];
+  var LONG = { '3h': 'Last 3 hours', '6h': 'Last 6 hours', '12h': 'Last 12 hours', '24h': 'Last 24 hours', '3d': 'Last 3 days' };
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var DEF = { slope: 0.7, shift: 6, roomK: 0.7, setback: 3, day: 22.2, night: 19.5 };
+  var NAMES = { H: 'Heating', A: 'At temp', W: 'Hot water', P: 'Paused', D: 'Defrost' };
+  function md(t) { return ((t % 1440) + 1440) % 1440; }
+  function di(t) { return Math.floor(t / 1440); }
+  function wd(t) { return ((di(t) % 7) + 7) % 7; }
+  function wrap(t) { return t < -2880 ? -2880 + md(t) : t; }
+  function p2(n) { return n < 10 ? '0' + n : '' + n; }
+  function fx(n) { return Math.round(n * 10) / 10; }
+  function f1(n) { return (Math.round(n * 10) / 10).toFixed(1); }
+  function sg(n, d) { var a = Math.abs(n).toFixed(d === undefined ? 1 : d); if (+a === 0) return (0).toFixed(d === undefined ? 1 : d); return (n < 0 ? '−' : '+') + a; }
+  function hm(t) { var m = md(t), h = Math.floor(m / 60); return (h % 12 || 12) + ':' + p2(m % 60) + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  function hr(t) { var m = md(t), h = Math.floor(m / 60), mm = m % 60; return (h % 12 || 12) + (mm ? ':' + p2(mm) : '') + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  function hh(t) { var m = md(t); return p2(Math.floor(m / 60)) + ':' + p2(m % 60); }
+  function when(t) { return di(t) === 0 ? hm(t) : DAYS[wd(t)] + ' ' + hm(t); }
+  function dur(m) { m = Math.round(m); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : ''); }
+  function prep(kp) {
+    var n = kp.length, m = [], d = [], k;
+    for (k = 0; k < n - 1; k++) d[k] = (kp[k + 1][1] - kp[k][1]) / (kp[k + 1][0] - kp[k][0]);
+    for (k = 0; k < n; k++) m[k] = k === 0 ? d[0] : k === n - 1 ? d[n - 2] : (d[k - 1] * d[k] <= 0 ? 0 : 2 / (1 / d[k - 1] + 1 / d[k]));
+    return { kp: kp, m: m };
+  }
+  function interp(P, t) {
+    var kp = P.kp, m = P.m, n = kp.length; t = wrap(t);
+    if (t <= kp[0][0]) return kp[0][1];
+    if (t >= kp[n - 1][0]) return kp[n - 1][1];
+    var lo = 0, hi = n - 1;
+    while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (kp[mid][0] <= t) lo = mid; else hi = mid; }
+    var x0 = kp[lo][0], h = kp[hi][0] - x0, u = (t - x0) / h, u2 = u * u, u3 = u2 * u;
+    return (2 * u3 - 3 * u2 + 1) * kp[lo][1] + (u3 - 2 * u2 + u) * h * m[lo] + (3 * u2 - 2 * u3) * kp[hi][1] + (u3 - u2) * h * m[hi];
+  }
+  var OUTP = prep([[-2880, 5.3], [-2700, 4.1], [-2430, 3.2], [-2250, 6.2], [-2040, 9.0], [-1800, 7.4], [-1560, 6.0], [-1300, 4.6], [-990, 4.0], [-860, 6.1], [-720, 8.6], [-570, 9.8], [-460, 9.3], [-360, 8.0], [-120, 5.6], [0, 4.6], [150, 3.7], [300, 2.5], [420, 2.2], [470, 2.0], [510, 2.3], [560, 4.6], [585, 6.8], [610, 6.2], [630, 5.0], [660, 5.3], [720, 6.6], [790, 7.9], [855, 8.8], [910, 8.6], [950, 8.4], [1020, 7.6], [1080, 6.9], [1140, 6.2], [1200, 5.8], [1320, 5.1], [1440, 4.6]]);
+  var ROOMP = prep([[-2880, 21.5], [-2600, 20.9], [-2415, 20.6], [-2300, 21.0], [-2100, 21.5], [-1980, 21.9], [-1800, 22.1], [-1600, 21.8], [-1440, 21.5], [-1200, 21.0], [-975, 20.6], [-860, 20.9], [-700, 21.2], [-576, 21.0], [-480, 22.2], [-400, 22.3], [-200, 22.3], [-60, 22.1], [0, 21.9], [144, 21.5], [230, 20.9], [330, 20.6], [475, 20.3], [540, 20.5], [600, 20.65], [710, 21.2], [780, 21.5], [830, 21.3], [870, 21.5], [884, 22.5], [892, 23.2], [904, 22.8], [925, 22.25], [950, 21.9]]);
+  var MODE = [[-2880, -2840, 'A'], [-2840, -2820, 'W'], [-2820, -2415, 'A'], [-2415, -2080, 'H'], [-2080, -2042, 'W'], [-2042, -1710, 'H'], [-1710, -1400, 'A'], [-1400, -1378, 'W'], [-1378, -975, 'A'], [-975, -645, 'H'], [-645, -608, 'W'], [-608, -355, 'H'], [-355, -338, 'P'], [-338, -303, 'H'], [-303, 35, 'A'], [35, 58, 'W'], [58, 465, 'A'], [465, 800, 'H'], [800, 840, 'W'], [840, 890, 'H'], [890, 902, 'A'], [902, 918, 'P'], [918, 930, 'A'], [930, 1e9, 'H']];
+  var TH = [[0, 35], [465, 37], [472, 41], [520, 40], [525, 41], [530, 40], [540, 39], [555, 38], [615, 39], [640, 40], [685, 39], [690, 40], [750, 39], [840, 38], [1080, 37]];
+  var TA = [[0, 37], [58, 30], [120, 31], [180, 32], [880, 34], [915, 35], [1137, 34], [1260, 35], [1410, 37]];
+  var CHANGES = [{ t: 641, label: 'Curve shift', from: '5 °C', to: '6 °C' }, { t: -280, label: 'Night temperature', from: '19.0 °C', to: '19.5 °C' }, { t: -2335, label: 'Room correction', from: '0.5', to: '0.7' }];
+  function modeAt(t) { t = wrap(t); var lo = 0, hi = MODE.length - 1; while (lo < hi) { var mid = (lo + hi) >> 1; if (MODE[mid][1] <= t) lo = mid + 1; else hi = mid; } return MODE[lo][2]; }
+  function stepv(tp, m) { var v = tp[0][1]; for (var k = 1; k < tp.length && tp[k][0] <= m; k++) v = tp[k][1]; return v; }
+  function tgtFor(t, s) { return s === 'W' ? 56 : s === 'P' ? NaN : stepv(s === 'A' ? TA : TH, md(t)); }
+  function sched(t) {
+    var m = md(t), w = wd(t);
+    if (m >= 465 && m < 540) return 'day';
+    if (w === 0) return (m < 90 || (m >= 990 && m < 1080)) ? 'day' : 'night';
+    if (w === 6) return (m >= 840 && m < 1110) ? 'day' : 'night';
+    return (m >= 960 && m < 1080) ? 'day' : 'night';
+  }
+  function setAt(t, s) { return sched(t) === 'day' ? s.day : s.night; }
+  function sunUp(t) { var m = md(t); return m >= 430 && m < 982; }
+  var S = (function () {
+    var n = SIMN, flow = new Float32Array(n), ret = new Float32Array(n), tgt = new Float32Array(n), room = new Float32Array(n), out = new Float32Array(n), raw = new Float32Array(n), dfr = new Uint8Array(n), st = new Array(n);
+    var f = 31, frost = 0.35, left = 0, prev = 'A';
+    for (var i = 0; i < n; i++) {
+      var t = SIM0 + i, s = modeAt(t), o = interp(OUTP, t) + 0.04 * Math.sin((t - NOW) * 0.21);
+      out[i] = o; st[i] = s;
+      if (t > NOW) { flow[i] = NaN; ret[i] = NaN; tgt[i] = NaN; room[i] = NaN; continue; }
+      var T = tgtFor(t, s);
+      if (prev === 'W' && s !== 'W') f = Math.min(f, 24.5);
+      if (prev !== 'W' && s === 'W') f = Math.min(f, 30);
+      if (left <= 0 && (s === 'H' || s === 'A') && o < 7.5) { frost += 1 / (35 + 6 * Math.max(o, 0)); if (frost >= 1) { frost = 0; left = 5 + (md(t) % 3); } }
+      var aim, tau;
+      if (left > 0) { aim = 21.5; tau = 1.6; dfr[i] = 1; left--; }
+      else if (s === 'P') { aim = 26; tau = 25; }
+      else if (s === 'W') { aim = 57.5; tau = 17; }
+      else { aim = T - 0.5; tau = f < aim - 3 ? 6 : f > aim ? 5 : 9; }
+      f += (aim - f) * (1 - Math.exp(-1 / tau));
+      raw[i] = f;
+      flow[i] = f + 0.12 * Math.sin(t * 0.9) + 0.08 * Math.sin(t * 2.3 + 1.7);
+      ret[i] = (i >= 3 ? raw[i - 3] : f) - (s === 'P' ? 1.2 : s === 'W' ? 5.2 : 4.4) + 0.1 * Math.sin(t * 1.3);
+      tgt[i] = T;
+      room[i] = interp(ROOMP, t) + 0.03 * Math.sin((t - NOW) * 0.37) + 0.02 * Math.sin((t - NOW) * 1.1);
+      prev = s;
+    }
+    return { flow: flow, ret: ret, tgt: tgt, room: room, out: out, st: st, dfr: dfr };
+  })();
+  function line(arr, t0, t1, X, Y, maxPts) {
+    var n = t1 - t0; if (n <= 0) return '';
+    var step = Math.max(1, Math.ceil(n / maxPts)), d = '', pen = false;
+    for (var a = t0; a <= t1; a += step) {
+      var b = Math.min(a + step - 1, t1), lo = Infinity, hi = -Infinity, tl = a, th = a, gap = false;
+      for (var t = a; t <= b; t++) { var v = arr[t - SIM0]; if (v === undefined || v !== v) { gap = true; continue; } if (v < lo) { lo = v; tl = t; } if (v > hi) { hi = v; th = t; } }
+      if (lo === Infinity) { pen = false; continue; }
+      if (step === 1 || lo === hi) { d += (pen ? 'L' : 'M') + fx(X(tl)) + ' ' + fx(Y(lo)); }
+      else { var p = tl < th ? [tl, lo, th, hi] : [th, hi, tl, lo]; d += (pen ? 'L' : 'M') + fx(X(p[0])) + ' ' + fx(Y(p[1])) + 'L' + fx(X(p[2])) + ' ' + fx(Y(p[3])); }
+      pen = !gap;
+    }
+    return d;
+  }
+  function steps(t0, t1, X, Y, val) {
+    var d = '', cv = null, lastT = t0;
+    for (var t = t0; t <= t1; t++) {
+      var v = val(t);
+      if (v !== v) { if (cv !== null) d += 'H' + fx(X(t)); cv = null; continue; }
+      if (cv === null) { d += 'M' + fx(X(t)) + ' ' + fx(Y(v)); cv = v; }
+      else if (v !== cv) { d += 'H' + fx(X(t)) + 'V' + fx(Y(v)); cv = v; }
+      lastT = t;
+    }
+    if (cv !== null) d += 'H' + fx(X(lastT));
+    return d;
+  }
+  function tsteps(t0, t1, X, Y) {
+    var o = { H: '', A: '', W: '' }, cs = null, cv = 0, lastT = t0;
+    for (var t = t0; t <= t1; t++) {
+      var i = t - SIM0, s = S.st[i], v = S.tgt[i];
+      if (s === 'P' || v !== v) { if (cs) o[cs] += 'H' + fx(X(t)); cs = null; continue; }
+      var x = fx(X(t)), y = fx(Y(v));
+      if (s !== cs) { if (cs) { o[cs] += 'H' + x; o[s] += 'M' + x + ' ' + fx(Y(cv)) + 'V' + y; } else o[s] += 'M' + x + ' ' + y; cs = s; cv = v; }
+      else if (v !== cv) { o[s] += 'H' + x + 'V' + y; cv = v; }
+      lastT = t;
+    }
+    if (cs) o[cs] += 'H' + fx(X(lastT));
+    return o;
+  }
+  function runs(t0, t1, pred) {
+    var o = [], a = null;
+    for (var t = t0; t <= t1; t++) { var p = pred(t); if (p && a === null) a = t; if (!p && a !== null) { o.push([a, t]); a = null; } }
+    if (a !== null) o.push([a, t1]);
+    return o;
+  }
+  var CACHE = {};
+  function view(c) {
+    var key = [c.range, c.offset, c.fc ? 1 : 0, c.W, c.fH, c.rH, c.oH, c.cap ? 1 : 0].join('|');
+    if (CACHE[key]) return CACHE[key];
+    var span = SPAN[c.range], t1 = NOW - c.offset, t0 = t1 - span, fc = !!c.fc && c.offset === 0;
+    var tE = fc ? t1 + Math.round(span / 4) : t1, W = c.W, tN = Math.min(t1, NOW);
+    var X = function (t) { return (t - t0) / (tE - t0) * W; };
+    var v = { key: key, t0: t0, t1: t1, tE: tE, tN: tN, span: span, fc: fc, X: X, W: W, offset: c.offset, range: c.range };
+    var i, t, a, b, k;
+    var mn = 99, mx = -99, mxh = -99;
+    for (t = t0; t <= tN; t++) {
+      i = t - SIM0; a = S.flow[i]; b = S.tgt[i]; var w = S.st[i] === 'W';
+      if (a < mn) mn = a; if (a > mx) mx = a; if (!w && a > mxh) mxh = a;
+      if (b === b) { if (b < mn) mn = b; if (b > mx) mx = b; if (!w && b > mxh) mxh = b; }
+    }
+    if (fc) { mx = Math.max(mx, 42); mxh = Math.max(mxh, 42); }
+    var top = c.cap ? mxh : mx, lo = Math.floor((mn - 1) / 5) * 5, hi = Math.ceil((top + 1) / 5) * 5;
+    if (hi - lo < 15) lo = hi - 15;
+    var fst = hi - lo > 25 ? 10 : 5, fH = c.fH;
+    var Yf = function (x) { return 6 + (hi - x) / (hi - lo) * (fH - 10); };
+    v.Yf = Yf; v.flo = lo; v.fhi = hi; v.fGrid = ''; v.fTicks = [];
+    for (a = lo; a <= hi; a += fst) { var gy = Math.round(Yf(a)) + 0.5; v.fGrid += 'M0 ' + gy + 'H' + W; v.fTicks.push({ y: gy, v: a, label: a + '°' }); }
+    v.flow = line(S.flow, t0, tN, X, Yf, W * 1.5);
+    v.ret = line(S.ret, t0, tN, X, Yf, W * 1.5);
+    var tg = tsteps(t0, tN, X, Yf); v.tH = tg.H; v.tA = tg.A; v.tW = tg.W;
+    var rmn = 99, rmx = -99, rtl = t0, rth = t0, smn = 99, smx = -99;
+    for (t = t0; t <= tN; t++) { a = S.room[t - SIM0]; if (a < rmn) { rmn = a; rtl = t; } if (a > rmx) { rmx = a; rth = t; } }
+    for (t = t0; t <= tE; t += 5) { a = setAt(t, DEF); if (a < smn) smn = a; if (a > smx) smx = a; }
+    var rlo = Math.min(rmn, smn) - 0.3, rhi = Math.max(rmx, smx) + 0.3, rH = c.rH;
+    var Yr = function (x) { return 5 + (rhi - x) / (rhi - rlo) * (rH - 10); };
+    v.Yr = Yr; v.rlo = rlo; v.rhi = rhi;
+    v.room = line(S.room, t0, tN, X, Yr, W);
+    v.roomA = v.room ? v.room + 'L' + fx(X(tN)) + ' ' + rH + 'L' + fx(X(t0)) + ' ' + rH + 'Z' : '';
+    v.set = steps(t0, tN, X, Yr, function (t) { return setAt(t, DEF); });
+    v.rMin = { x: fx(X(rtl)), y: fx(Yr(rmn)), v: rmn, t: rtl, label: f1(rmn) + '°' };
+    v.rMax = { x: fx(X(rth)), y: fx(Yr(rmx)), v: rmx, t: rth, label: f1(rmx) + '°' };
+    var omn = 99, omx = -99, otl = t0, oth = t0;
+    for (t = t0; t <= tN; t++) { a = S.out[t - SIM0]; if (a < omn) { omn = a; otl = t; } if (a > omx) { omx = a; oth = t; } }
+    var dmn = omn, dmx = omx;
+    for (t = tN; t <= tE; t++) { a = S.out[t - SIM0]; if (a < dmn) dmn = a; if (a > dmx) dmx = a; }
+    var olo = dmn - 0.8, ohi = dmx + 0.8, oH = c.oH;
+    var Yo = function (x) { return 5 + (ohi - x) / (ohi - olo) * (oH - 10); };
+    v.Yo = Yo; v.olo = olo; v.ohi = ohi;
+    v.out = line(S.out, t0, tN, X, Yo, W);
+    v.outA = v.out ? v.out + 'L' + fx(X(tN)) + ' ' + oH + 'L' + fx(X(t0)) + ' ' + oH + 'Z' : '';
+    v.outF = fc ? line(S.out, tN, tE, X, Yo, W) : '';
+    v.oMin = { x: fx(X(otl)), y: fx(Yo(omn)), v: omn, t: otl, label: f1(omn) + '°' };
+    v.oMax = { x: fx(X(oth)), y: fx(Yo(omx)), v: omx, t: oth, label: f1(omx) + '°' };
+    var band = function (r) { var x0 = X(r[0]), x1 = X(r[1]); return { x: fx(x0), w: fx(x1 - x0), a: r[0], b: r[1] }; };
+    v.nights = runs(t0, tE, function (t) { return sched(t) === 'night'; }).map(band);
+    v.days = runs(t0, tE, function (t) { return sched(t) === 'day'; }).map(band);
+    v.suns = runs(t0, tE, sunUp).map(band);
+    var segs = [], cur = null, bsegs = [], bc = null;
+    for (t = t0; t < tN; t++) {
+      i = t - SIM0; k = S.dfr[i] ? 'D' : S.st[i];
+      if (cur && cur.k === k) cur.b = t + 1; else { if (cur) segs.push(cur); cur = { k: k, a: t, b: t + 1 }; }
+      var kb = S.st[i];
+      if (bc && bc.k === kb) bc.b = t + 1; else { if (bc) bsegs.push(bc); bc = { k: kb, a: t, b: t + 1 }; }
+    }
+    if (cur) segs.push(cur); if (bc) bsegs.push(bc);
+    v.segs = segs.map(function (g) { var x0 = X(g.a), x1 = X(g.b); return { k: g.k, a: g.a, b: g.b, x: fx(x0), w: fx(Math.max(x1 - x0, g.k === 'D' ? 2.5 : 1)) }; });
+    v.bsegs = bsegs;
+    var nD = 0, mW = 0, nW = 0, mA = 0, mH = 0, mP = 0, lastD = null, sumD = 0;
+    segs.forEach(function (g) { if (g.k === 'D') { nD++; sumD += g.b - g.a; lastD = g.a; } });
+    bsegs.forEach(function (g) { var d = g.b - g.a; if (g.k === 'W') { mW += d; nW++; } else if (g.k === 'A') mA += d; else if (g.k === 'H') mH += d; else mP += d; });
+    var tot = Math.max(1, tN - t0);
+    v.stats = { defrosts: nD, defrostAvg: nD ? Math.round(sumD / nD) : 0, lastDefrost: lastD, dhwMin: mW, dhwRuns: nW, atMin: mA, heatMin: mH, pauseMin: mP, total: tot, atPct: Math.round(mA / tot * 100), heatPct: Math.round(mH / tot * 100) };
+    v.present = { H: mH > 0, A: mA > 0, W: mW > 0, P: mP > 0, D: nD > 0 };
+    var sp = tE - t0, xs = sp <= 200 ? 30 : sp <= 420 ? 60 : sp <= 900 ? 120 : sp <= 1800 ? 240 : 720;
+    v.xt = [];
+    for (t = Math.ceil(t0 / xs) * xs; t <= tE; t += xs) {
+      var xx = X(t); if (xx < 14 || xx > W - 14) continue;
+      var mid = md(t) === 0;
+      v.xt.push({ x: fx(xx), t: t, label: mid ? DAYS[wd(t)] + ' ' + (8 + di(t)) : hr(t), fw: mid ? 600 : 400, mid: mid });
+    }
+    v.changes = CHANGES.filter(function (ch) { return ch.t >= t0 && ch.t <= tN; }).map(function (ch) { return { x: fx(X(ch.t)), t: ch.t, label: ch.label, text: ch.label + ' ' + ch.from + ' → ' + ch.to, from: ch.from, to: ch.to, when: when(ch.t) }; });
+    v.nowX = fx(X(NOW));
+    v.label = c.offset === 0 ? LONG[c.range] : rangeLabel(t0, t1);
+    v.short = c.offset === 0 ? 'Last ' + c.range : rangeLabel(t0, t1);
+    CACHE[key] = v;
+    return v;
+  }
+  function rangeLabel(a, b) { return di(a) === di(b) ? DAYS[wd(a)] + ' ' + hm(a) + ' – ' + hm(b) : DAYS[wd(a)] + ' ' + hm(a) + ' – ' + DAYS[wd(b)] + ' ' + hm(b); }
+  function ctxNow(s) { return { out: S.out[NOW - SIM0], room: S.room[NOW - SIM0], set: setAt(NOW, s), atTemp: modeAt(NOW) === 'A' }; }
+  function curveAt(s, out) { return 20 + s.shift + s.slope * 1.6133 * (20 - out); }
+  function breakdown(s, ctx) {
+    ctx = ctx || ctxNow(s);
+    var curve = curveAt(s, ctx.out), roomC = -s.roomK * (ctx.room - ctx.set), sb = ctx.atTemp ? -s.setback : 0;
+    var raw = curve + roomC + sb, target = Math.ceil(raw - 1e-6), rnd = target - raw;
+    return { curve: curve, room: roomC, setback: sb, round: rnd, raw: raw, target: target, out: ctx.out, set: ctx.set, roomT: ctx.room, atTemp: ctx.atTemp, curveTxt: f1(curve), roomTxt: sg(roomC), setbackTxt: sb ? sg(sb) : '–', roundTxt: sg(rnd), targetTxt: String(target) };
+  }
+  function fcTarget(t, s) { return breakdown(s, { out: S.out[t - SIM0], room: S.room[NOW - SIM0], set: setAt(t, s), atTemp: false }).target; }
+  function fcPaths(v, s) {
+    if (!v.fc) return { tgt: '', set: '' };
+    return { tgt: steps(NOW, v.tE, v.X, v.Yf, function (t) { return fcTarget(t, s); }), set: steps(NOW, v.tE, v.X, v.Yr, function (t) { return setAt(t, s); }) };
+  }
+  function sinceOf(t, base, dfr) {
+    var a = t, k = 0;
+    if (dfr) { while (k++ < 60 && S.dfr[a - 1 - SIM0] === 1) a--; return a; }
+    while (k++ < 4320 && modeAt(a - 1) === base) a--;
+    return a;
+  }
+  function nextSched(t, s) {
+    var cur = sched(t);
+    for (var k = 1; k <= 1440; k++) { var nx = sched(t + k); if (nx !== cur) { var tp = nx === 'day' ? s.day : s.night; return { t: t + k, kind: nx, temp: tp, label: (nx === 'day' ? 'Day ' : 'Night ') + f1(tp) + '° at ' + hm(t + k) }; } }
+    return null;
+  }
+  function readout(t, s) {
+    var live = t === null || t === undefined; if (live) t = NOW;
+    var i = t - SIM0, past = t <= NOW, base = modeAt(t), dfr = past && S.dfr[i] === 1, ss = (live || !past) ? s : DEF;
+    var r = { t: t, live: live, past: past, base: base, mode: dfr ? 'D' : base, sched: sched(t), sun: sunUp(t), out: S.out[i], set: setAt(t, ss) };
+    if (past) { r.flow = S.flow[i]; r.ret = S.ret[i]; r.room = S.room[i]; r.target = S.tgt[i]; }
+    else { r.flow = NaN; r.ret = NaN; r.room = NaN; r.target = fcTarget(t, s); }
+    if (live && (base === 'H' || base === 'A')) r.target = breakdown(s).target;
+    r.dT = r.flow - r.ret; r.dFlow = r.flow - r.target; r.dRoom = r.room - r.set;
+    r.since = sinceOf(t, base, dfr); r.next = nextSched(t, ss);
+    r.time = hm(t); r.when = when(t); r.hh = hh(t); r.hhd = (di(t) === 0 ? '' : DAYS[wd(t)].toUpperCase() + ' ') + hh(t);
+    r.change = null;
+    for (var k = 0; k < CHANGES.length; k++) if (Math.abs(CHANGES[k].t - t) <= 8) r.change = CHANGES[k].label + ' ' + CHANGES[k].from + ' → ' + CHANGES[k].to;
+    r.flowTxt = r.flow === r.flow ? f1(r.flow) + '°' : '–';
+    r.retTxt = r.ret === r.ret ? f1(r.ret) + '°' : '–';
+    r.dTTxt = r.dT === r.dT ? f1(r.dT) + '°' : '–';
+    r.roomTxt = r.room === r.room ? f1(r.room) + '°' : '–';
+    r.outTxt = f1(r.out) + '°';
+    r.setTxt = f1(r.set) + '°';
+    r.tgtTxt = r.target === r.target ? r.target + '°' : '–';
+    r.schedName = r.sched === 'day' ? 'Day' : 'Night';
+    return r;
+  }
+  var CTRL = [
+    { k: 'slope', label: 'Weather curve', short: 'Curve', hint: 'How much hotter the water runs as it gets colder outside', step: 0.1, min: 0.2, max: 2.5, d: 1, unit: '', grp: 'Weather compensation' },
+    { k: 'shift', label: 'Curve shift', short: 'Shift', hint: 'Lifts or lowers the whole curve', step: 1, min: -10, max: 15, d: 0, unit: ' °C', grp: 'Weather compensation' },
+    { k: 'roomK', label: 'Room correction', short: 'Room', hint: 'Trims the water when the room is off its setting', step: 0.1, min: 0, max: 3, d: 1, unit: '', grp: 'Room' },
+    { k: 'setback', label: 'Setback', short: 'Setback', hint: 'Water this much cooler once the room is at temperature', step: 0.5, min: 0, max: 10, d: -1, unit: ' °C', grp: 'Room' },
+    { k: 'day', label: 'Day temperature', short: 'Day', hint: 'Room setting during day periods', step: 0.1, min: 15, max: 25, d: 1, unit: ' °C', grp: 'Schedule' },
+    { k: 'night', label: 'Night temperature', short: 'Night', hint: 'Room setting the rest of the time', step: 0.1, min: 12, max: 23, d: 1, unit: ' °C', grp: 'Schedule' }
+  ];
+  function fmtNum(c, v) { return c.d === -1 ? (Math.round(v * 10) % 10 ? v.toFixed(1) : String(Math.round(v))) : v.toFixed(c.d); }
+  function fmtCtrl(c, v) { return fmtNum(c, v) + c.unit; }
+  function stepVal(c, v, dir) { var n = Math.round((v + dir * c.step) / c.step) * c.step; n = Math.max(c.min, Math.min(c.max, n)); return Math.round(n * 100) / 100; }
+  function copy(o) { var r = {}; for (var k in o) r[k] = o[k]; return r; }
+  function same(a, b) { for (var k in DEF) if (Math.abs(a[k] - b[k]) > 1e-9) return false; return true; }
+  function changed(a, b) { return CTRL.filter(function (c) { return Math.abs(a[c.k] - b[c.k]) > 1e-9; }); }
+  function hexMix(a, b, u) {
+    var pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16), r = Math.round(((pa >> 16) & 255) * (1 - u) + ((pb >> 16) & 255) * u), g = Math.round(((pa >> 8) & 255) * (1 - u) + ((pb >> 8) & 255) * u), bl = Math.round((pa & 255) * (1 - u) + (pb & 255) * u);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1);
+  }
+  function sunGrad(v, night, dawn, day) {
+    var stops = [], n = 36;
+    for (var k = 0; k <= n; k++) {
+      var t = v.t0 + (v.tE - v.t0) * k / n, m = md(t), e = (m < 400 || m > 1012) ? 0 : Math.sin(Math.PI * (m - 400) / 612);
+      var c = e < 0.25 ? hexMix(night, dawn, e / 0.25) : hexMix(dawn, day, Math.min(1, (e - 0.25) / 0.35));
+      stops.push(c + ' ' + (k / n * 100).toFixed(1) + '%');
+    }
+    return 'linear-gradient(90deg,' + stops.join(',') + ')';
+  }
+  return { NOW: NOW, SIM0: SIM0, MAXBACK: MAXBACK, SPAN: SPAN, RANGES: RANGES, DEF: DEF, NAMES: NAMES, CTRL: CTRL, S: S, view: view, readout: readout, breakdown: breakdown, ctxNow: ctxNow, curveAt: curveAt, fcPaths: fcPaths, sunGrad: sunGrad, stepVal: stepVal, fmtCtrl: fmtCtrl, fmtNum: fmtNum, copy: copy, same: same, changed: changed, line: line, steps: steps, fx: fx, f1: f1, sg: sg, hm: hm, hr: hr, hh: hh, when: when, dur: dur, sched: sched, setAt: setAt, modeAt: modeAt, md: md, di: di, wd: wd };
+})();
+
+var IC = {
+  sliders: 'M4 7h9M17 7h3M4 17h3M11 17h9M17 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM11 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z',
+  chevL: 'M15 18l-6-6 6-6', chevR: 'M9 18l6-6-6-6',
+  x: 'M6 6l12 12M18 6L6 18',
+  now: 'M5 12h10M11 7l5 5-5 5M19 6v12',
+  check: 'M5 12.5l4.2 4.2L19 7',
+  plus: 'M12 5v14M5 12h14', minus: 'M5 12h14'
+};
+var PAL = { H: '#D9782F', A: '#24A874', W: '#8D6BEA', D: '#2B9AD0', P: '#4A5361' };
+var LBL = { H: 'HEAT', A: 'AT TEMP', W: 'DHW', P: 'PAUSE', D: '' };
+var LFG = { H: '#10141A', A: '#10141A', W: '#10141A', P: '#E6EAF0', D: '#10141A' };
+var MTITLE = { H: 'HEATING', A: 'AT TEMP', W: 'HOT WATER', P: 'PAUSED', D: 'DEFROST' };
+var UDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+function dayHH(t) { return UDAYS[HP.wd(t)] + ' ' + HP.hh(t); }
+function dtBand(v) {
+  if (v._dt !== undefined) return v._dt;
+  var n = v.tN - v.t0, step = Math.max(1, Math.ceil(n / 300)), top = [], bot = [];
+  for (var t = v.t0; t <= v.tN; t += step) { var f = HP.S.flow[t - HP.SIM0], r = HP.S.ret[t - HP.SIM0]; if (f === f && r === r) { top.push(HP.fx(v.X(t)) + ' ' + HP.fx(v.Yf(f))); bot.push(HP.fx(v.X(t)) + ' ' + HP.fx(v.Yf(r))); } }
+  v._dt = top.length ? 'M' + top.join('L') + 'L' + bot.reverse().join('L') + 'Z' : '';
+  return v._dt;
+}
+function dotLabel(p, H, W, above) {
+  var lx = Math.max(14, Math.min(W - 26, p.x)), ly, tf = 'translateX(-50%)';
+  if ((above && p.y < 15) || (!above && p.y > H - 15)) { ly = p.y - 6; lx = p.x > 60 ? p.x - 7 : p.x + 7; tf = p.x > 60 ? 'translateX(-100%)' : 'none'; }
+  else ly = above ? p.y - 15 : p.y + 4;
+  return { x: p.x, y: p.y, lx: HP.fx(lx), ly: HP.fx(ly), tf: tf, label: p.label };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var p = props || {}, view = p.view || 'live';
+    var demo = HP.copy(HP.DEF); demo.slope = 0.8; demo.setback = 3.5;
+    this.state = { range: '12h', offset: 0, scrub: view === 'inspect' ? (parseInt(p.at, 10) || 520) : null, ret: true, chg: true, fc: false, adj: view === 'adjust', draft: view === 'adjust' ? demo : null, saved: HP.copy(HP.DEF), mine: [], toast: '' };
+    this.onScrub = this.onScrub.bind(this);
+  }
+  componentWillUnmount() { if (this._tt) clearTimeout(this._tt); }
+  onScrub(e) {
+    var el = e.currentTarget, v = this._v; if (!el || !v) return;
+    var r = el.getBoundingClientRect(); if (!r.width) return;
+    var f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    var t = Math.min(Math.round(v.t0 + f * (v.tE - v.t0)), v.fc ? v.tE : v.tN);
+    if (t !== this.state.scrub) this.setState({ scrub: t });
+  }
+  pick(rg) {
+    var s = this.state, span = HP.SPAN[rg], off = Math.max(0, Math.min(s.offset, HP.MAXBACK - span)), sc = s.scrub;
+    if (sc !== null && (sc < HP.NOW - off - span || sc > HP.NOW - off)) sc = null;
+    this.setState({ range: rg, offset: off, scrub: sc });
+  }
+  pan(dir) {
+    var s = this.state, span = HP.SPAN[s.range];
+    var off = dir < 0 ? Math.min(s.offset + span, HP.MAXBACK - span) : Math.max(0, s.offset - span);
+    this.setState({ offset: off, scrub: null });
+  }
+  stepCtrl(c, dir) { var d = HP.copy(this.state.draft || this.state.saved); d[c.k] = HP.stepVal(c, d[c.k], dir); this.setState({ draft: d }); }
+  save() {
+    var s = this.state, d = s.draft; if (!d) return;
+    var ch = HP.changed(d, s.saved), self = this;
+    var mine = s.mine.concat(ch.map(function (c) { return { t: HP.NOW, text: c.label + ' ' + HP.fmtCtrl(c, s.saved[c.k]) + ' → ' + HP.fmtCtrl(c, d[c.k]) }; }));
+    this.setState({ saved: d, draft: null, adj: false, mine: mine, toast: 'SAVED · FLOW TARGET ' + HP.breakdown(d).target + '°' });
+    if (this._tt) clearTimeout(this._tt);
+    this._tt = setTimeout(function () { self.setState({ toast: '' }); }, 3200);
+  }
+  renderVals() {
+    var s = this.state, self = this, W = 318;
+    var v = HP.view({ range: s.range, offset: s.offset, fc: s.fc, W: W, fH: 150, rH: 54, oH: 46 });
+    this._v = v;
+    var insp = s.scrub !== null && s.scrub !== undefined, ok = function (x) { return x === x; };
+    var live = HP.readout(null, s.saved), rd = insp ? HP.readout(s.scrub, s.saved) : live;
+    var fp = HP.fcPaths(v, s.saved);
+    var tc = PAL[rd.base === 'W' ? 'W' : rd.base === 'A' ? 'A' : 'H'];
+    var sinceT = live.since, sinceTxt = 'SINCE ' + (HP.di(sinceT) === 0 ? HP.hh(sinceT) : dayHH(sinceT));
+    var dr = live.dRoom, stLine;
+    if (live.mode === 'A') stLine = 'Water −' + s.saved.setback + '° until room < ' + HP.f1(live.set - 0.1) + '°';
+    else stLine = 'Room ' + HP.sg(dr) + '° vs ' + live.schedName.toLowerCase() + ' setting ' + live.setTxt;
+    if (live.next) stLine += ' · ' + (live.next.kind === 'day' ? 'Day ' : 'Night ') + HP.f1(live.next.temp) + '° at ' + HP.hh(live.next.t);
+    var cells = [
+      { label: 'FLOW', c: '#3F8CF2', ls: 'solid', value: rd.flowTxt, delta: ok(rd.dFlow) ? HP.sg(rd.dFlow) + ' vs tgt' : '', dc: ok(rd.dFlow) && rd.dFlow < -2 ? '#F0A35E' : '#7D8796' },
+      { label: 'TARGET', c: tc, ls: rd.base === 'W' ? 'dashed' : 'solid', value: rd.tgtTxt, delta: { H: 'heating', A: 'setback', W: 'hot water', P: 'none' }[rd.base], dc: '#7D8796' },
+      { label: 'RETURN', c: '#2D64B0', ls: 'solid', value: rd.retTxt, delta: '', dc: '#7D8796' },
+      { label: 'ΔT', c: '#3F8CF2', ls: 'dotted', value: rd.dTTxt, delta: 'flow − ret', dc: '#7D8796' },
+      { label: 'ROOM', c: '#E6EAF0', ls: 'solid', value: rd.roomTxt, delta: ok(rd.dRoom) ? HP.sg(rd.dRoom) + ' vs set' : '', dc: '#7D8796' },
+      { label: 'SET', c: '#7D8796', ls: 'dashed', value: rd.setTxt, delta: rd.schedName.toLowerCase(), dc: '#7D8796' },
+      { label: 'OUTSIDE', c: '#2DBFA5', ls: 'solid', value: rd.outTxt, delta: rd.sun ? 'daylight' : 'dark', dc: '#7D8796' },
+      { label: 'DEFROSTS', c: PAL.D, ls: 'solid', value: '×' + v.stats.defrosts, delta: v.stats.defrosts ? '~' + v.stats.defrostAvg + ' min each' : 'none', dc: '#7D8796' }
+    ];
+    var cx = insp ? HP.fx(v.X(rd.t)) : -40;
+    var cur = {
+      x: cx, op: insp ? 1 : 0, lx: 38 + (insp ? cx : -60), opL: insp ? 0.85 : 0,
+      yF: ok(rd.flow) ? HP.fx(v.Yf(rd.flow)) : -40, opF: insp && ok(rd.flow) ? 1 : 0,
+      yT: ok(rd.target) ? HP.fx(v.Yf(rd.target)) : -40, opT: insp && ok(rd.target) ? 1 : 0,
+      yRt: ok(rd.ret) ? HP.fx(v.Yf(rd.ret)) : -40, opRt: insp && ok(rd.ret) && s.ret ? 1 : 0,
+      yR: ok(rd.room) ? HP.fx(v.Yr(rd.room)) : -40, opR: insp && ok(rd.room) ? 1 : 0,
+      yO: HP.fx(v.Yo(rd.out))
+    };
+    var chg = [];
+    if (s.chg) {
+      chg = v.changes.map(function (c) { return { x: c.x, text: c.when + ' · ' + c.text }; });
+      if (v.offset === 0) s.mine.forEach(function (m) { chg.push({ x: HP.fx(v.X(m.t)) - 4, text: 'Just now · ' + m.text }); });
+    }
+    var dhw = v.bsegs.filter(function (g) { return g.k === 'W'; }).map(function (g) { var x0 = v.X(g.a), x1 = v.X(g.b); return { x: HP.fx(x0), w: HP.fx(Math.max(2, x1 - x0)), lop: x1 - x0 > 22 ? 1 : 0 }; });
+    var lane = [];
+    v.nights.forEach(function (b) { lane.push({ x: b.x, w: b.w, bg: '#2A2550', fg: '#C4BBFF', label: 'NIGHT ' + HP.f1(b.a > HP.NOW ? s.saved.night : HP.DEF.night), lop: b.w > 66 ? 1 : 0 }); });
+    v.days.forEach(function (b) { lane.push({ x: b.x, w: b.w, bg: '#3A3215', fg: '#F2CC60', label: 'DAY ' + HP.f1(b.a > HP.NOW ? s.saved.day : HP.DEF.day), lop: b.w > 56 ? 1 : 0 }); });
+    var segs = v.segs.filter(function (g) { return g.k !== 'D'; }).concat(v.segs.filter(function (g) { return g.k === 'D'; })).map(function (g) {
+      var lab = LBL[g.k], need = lab.length * 6 + 8;
+      return { x: g.x, w: g.w, c: PAL[g.k], label: lab, fg: LFG[g.k], lop: g.w >= need ? 1 : 0 };
+    });
+    var sunMarks = [];
+    v.suns.forEach(function (b) {
+      if (b.a > v.t0 && b.x > 30) sunMarks.push({ x: b.x, tf: 'translateX(-100%)', label: '↑' + HP.hh(b.a) });
+      if (b.b < v.tE && b.x + b.w < W - 30) sunMarks.push({ x: HP.fx(b.x + b.w), tf: 'none', label: '↓' + HP.hh(b.b) });
+    });
+    var xt = v.xt.map(function (x) { return { x: x.x, label: x.mid ? UDAYS[HP.wd(x.t)] : HP.hh(x.t), c: x.mid ? '#E6EAF0' : '#7D8796' }; });
+    var layers = [{ label: 'RETURN + ΔT', key: 'ret' }, { label: 'CHANGES', key: 'chg' }, { label: 'FORECAST β', key: 'fc' }].map(function (y) {
+      var on = !!s[y.key];
+      return { label: y.label, on: on, dot: on ? 1 : 0, bg: on ? '#1B2330' : 'transparent', bd: on ? '#3F8CF2' : '#2A313B', fg: on ? '#CFE0FA' : '#A9B2C0', toggle: function () { var o = {}; o[y.key] = !self.state[y.key]; self.setState(o); } };
+    });
+    var st = v.stats;
+    var statLine = 'HEAT ' + st.heatPct + '% · AT TEMP ' + st.atPct + '% · DHW ' + (st.dhwMin ? st.dhwMin + 'm' : '0') + ' · PAUSED ' + (st.pauseMin ? st.pauseMin + 'm' : '0');
+    var winTxt = (v.offset === 0 ? 'LAST ' + s.range.toUpperCase() + ' · ' : '') + dayHH(v.t0) + ' → ' + (HP.di(v.t0) === HP.di(v.t1) ? HP.hh(v.t1) : dayHH(v.t1));
+    var draft = s.draft || s.saved, bdNow = HP.breakdown(s.saved), bdNew = HP.breakdown(draft), dirty = !!s.adj && !HP.same(draft, s.saved);
+    var row = function (b, isNew) {
+      var vals = [b.curveTxt, b.roomTxt, b.setbackTxt, b.roundTxt, '=', b.targetTxt];
+      var ref = [bdNow.curveTxt, bdNow.roomTxt, bdNow.setbackTxt, bdNow.roundTxt, '=', bdNow.targetTxt];
+      return vals.map(function (x, i) {
+        var c = i === 4 ? '#7D8796' : isNew ? (!dirty ? '#3A4250' : x !== ref[i] ? '#7FB3FF' : '#7D8796') : '#E6EAF0';
+        return { v: isNew && !dirty && i !== 4 ? '–' : x, c: c, fs: i === 5 ? 20 : i === 4 ? 13 : 13 };
+      });
+    };
+    var tilesA = HP.CTRL.map(function (c) {
+      var val = draft[c.k], ch = Math.abs(val - s.saved[c.k]) > 1e-9;
+      return { label: c.label.toUpperCase(), name: c.label, val: HP.fmtNum(c, val), unit: c.unit ? '°C' : '', fg: ch ? '#7FB3FF' : '#E6EAF0', ring: ch ? 'inset 0 0 0 1px #3F8CF2' : 'inset 0 0 0 1px #1D232C', note: ch ? 'was ' + HP.fmtNum(c, s.saved[c.k]) : c.grp.toLowerCase(), nc: ch ? '#7FB3FF' : '#7D8796', dec: function () { self.stepCtrl(c, -1); }, inc: function () { self.stepCtrl(c, 1); } };
+    });
+    return {
+      ic: IC, stC: PAL[live.mode], stHalo: 'rgba(217,120,47,0.18)', stTitle: MTITLE[live.mode], stSince: sinceTxt, stLine: stLine,
+      insp: insp, notInsp: !insp, rd: rd, rdMode: MTITLE[rd.mode],
+      liveTxt: s.offset === 0 ? 'LIVE' : 'HISTORY', liveFg: s.offset === 0 ? '#3DD68C' : '#A9B2C0', liveBd: s.offset === 0 ? '#1F5A40' : '#2A313B',
+      clear: function () { self.setState({ scrub: null }); },
+      openAdj: function () { self.setState({ adj: true, draft: HP.copy(self.state.saved) }); },
+      closeAdj: function () { self.setState({ adj: false, draft: null }); },
+      reset: function () { self.setState({ draft: HP.copy(HP.DEF) }); },
+      save: function () { self.save(); },
+      cells: cells,
+      ranges: HP.RANGES.map(function (r, i) { var on = r === s.range; return { label: r.toUpperCase(), on: on, bg: on ? '#E6EAF0' : 'transparent', fg: on ? '#10141A' : '#A9B2C0', br: i < 4 ? '1px solid #2A313B' : '0', pick: function () { self.pick(r); } }; }),
+      back: function () { self.pan(-1); }, fwd: function () { self.pan(1); }, atNow: s.offset === 0, fwdOp: s.offset === 0 ? 0.35 : 1,
+      winTxt: winTxt, panned: s.offset > 0, toNow: function () { self.setState({ offset: 0, scrub: null }); },
+      fTicks: v.fTicks, dhw: dhw, fcOn: v.fc, nowX: v.nowX,
+      fGrid: v.fGrid, dtBand: s.ret ? dtBand(v) : '', retP: s.ret ? v.ret : '', tA: v.tA, tH: v.tH, tW: v.tW, fcT: fp.tgt, flowP: v.flow,
+      chg: chg, cur: cur, tColor: tc,
+      roomA: v.roomA, setP: v.set, fcSet: fp.set, roomP: v.room, rDots: [dotLabel(v.rMax, 54, W, true), dotLabel(v.rMin, 54, W, false)],
+      outA: v.outA, outF: v.outF, outP: v.out, oDots: [dotLabel(v.oMax, 46, W, true), dotLabel(v.oMin, 46, W, false)],
+      lane: lane, segs: segs, sunBg: HP.sunGrad(v, '#141A2B', '#5C3A22', '#7A6424'), sunMarks: sunMarks,
+      xt: xt, onScrub: this.onScrub, layers: layers, statLine: statLine,
+      hasToast: !!s.toast, toast: s.toast,
+      adj: !!s.adj, eqHead: ['CURVE', 'ROOM', 'SETBK', 'ROUND', '', 'TARGET'], eqNow: row(bdNow, false), eqNew: row(bdNew, true),
+      tilesA: tilesA, dirty: dirty, notDirty: !dirty,
+      saveBg: dirty ? '#3F8CF2' : '#1B2330', saveFg: dirty ? '#06101F' : '#4A5361', saveLabel: dirty ? 'SAVE · ' + bdNew.target + '°' : 'SAVE'
+    };
+  }
+}
+</script>
+</body>
+</html>

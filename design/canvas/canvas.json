@@ -1,0 +1,47 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-08T16:40:00Z" },
+  "title": "Heat Pump Card Redesign",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 420, "h": 780, "title": "A · Calm", "is_interactive": true },
+    "Focus.dc.html": { "x": 500, "y": 0, "w": 420, "h": 780, "title": "B · Focus", "is_interactive": true },
+    "Story.dc.html": { "x": 1000, "y": 0, "w": 420, "h": 1180, "title": "C · Story", "is_interactive": true },
+    "Instrument.dc.html": { "x": 1500, "y": 0, "w": 420, "h": 860, "title": "D · Instrument", "is_interactive": true },
+    "Curve.dc.html": { "x": 2000, "y": 0, "w": 420, "h": 1000, "title": "E · Curve", "is_interactive": true },
+    "Main-inspect.dc.html": { "x": 0, "y": 1580, "w": 420, "h": 780, "title": "A · Calm: inspecting 11:45 AM", "is_interactive": true },
+    "Focus-inspect.dc.html": { "x": 500, "y": 1580, "w": 420, "h": 780, "title": "B · Focus: inspecting hot water", "is_interactive": true },
+    "Story-inspect.dc.html": { "x": 1000, "y": 1580, "w": 420, "h": 1180, "title": "C · Story: tapped an event", "is_interactive": true },
+    "Instrument-inspect.dc.html": { "x": 1500, "y": 1580, "w": 420, "h": 860, "title": "D · Instrument: inspecting a defrost", "is_interactive": true },
+    "Curve-inspect.dc.html": { "x": 2000, "y": 1580, "w": 420, "h": 1000, "title": "E · Curve: inspecting 11:45 AM", "is_interactive": true },
+    "Main-adjust.dc.html": { "x": 0, "y": 3160, "w": 420, "h": 780, "title": "A · Calm: adjusting", "is_interactive": true },
+    "Focus-adjust.dc.html": { "x": 500, "y": 3160, "w": 420, "h": 780, "title": "B · Focus: adjusting", "is_interactive": true },
+    "Story-adjust.dc.html": { "x": 1000, "y": 3160, "w": 420, "h": 1180, "title": "C · Story: adjusting", "is_interactive": true },
+    "Instrument-adjust.dc.html": { "x": 1500, "y": 3160, "w": 420, "h": 860, "title": "D · Instrument: adjusting", "is_interactive": true },
+    "Curve-adjust.dc.html": { "x": 2000, "y": 3160, "w": 420, "h": 1000, "title": "E · Curve: adjusting", "is_interactive": true }
+  },
+  "order": [
+    "Main.dc.html",
+    "Focus.dc.html",
+    "Story.dc.html",
+    "Instrument.dc.html",
+    "Curve.dc.html",
+    "Main-inspect.dc.html",
+    "Focus-inspect.dc.html",
+    "Story-inspect.dc.html",
+    "Instrument-inspect.dc.html",
+    "Curve-inspect.dc.html",
+    "Main-adjust.dc.html",
+    "Focus-adjust.dc.html",
+    "Story-adjust.dc.html",
+    "Instrument-adjust.dc.html",
+    "Curve-adjust.dc.html"
+  ],
+  "notes": {
+    "rowLive": { "x": 0, "y": -300, "text": "1 · Live: tap or drag the charts, switch ranges, toggle layers, open Adjust", "kind": "title1", "maxW": 2420 },
+    "rowInspect": { "x": 0, "y": 1280, "text": "2 · Inspecting a moment in history", "kind": "title1", "maxW": 2420 },
+    "rowAdjust": { "x": 0, "y": 2860, "text": "3 · Adjusting the heating, with a live preview of the new flow target", "kind": "title1", "maxW": 2420 }
+  },
+  "designSystems": []
+}

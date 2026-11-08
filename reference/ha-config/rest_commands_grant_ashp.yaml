@@ -1,0 +1,122 @@
+# Grant Aerona 290 HP290 - REST Commands for Home Assistant
+# Allows changing settings on the heat pump from HA
+# Uses /econet/newParam endpoint on the local ecoNET300 hub
+# Device IP: http://HUB_IP/
+#
+# Usage: call rest_command.grant_set_XXX from automations, scripts, or dashboard buttons
+# All commands accept a 'value' variable
+#
+# Example automation action:
+#   service: rest_command.grant_set_dhw_target
+#   data:
+#     value: 48
+#
+# Parameter numbers confirmed from live editParams API response
+# ============================================================
+
+# --- DHW (Hot Water) Controls ---
+
+grant_set_dhw_target:
+  # Set DHW target temperature. Range: 35–65°C
+  url: "http://HUB_IP/econet/newParam?newParamName=103&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_dhw_mode:
+  # Set DHW work mode. Values: 0=Off, 1=On, 2=Scheduled
+  url: "http://HUB_IP/econet/newParam?newParamName=119&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_dhw_hysteresis:
+  # Set DHW hysteresis. Range: 5–18°C
+  url: "http://HUB_IP/econet/newParam?newParamName=104&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+# --- Circuit 1 (Heating) Controls ---
+
+grant_set_c1_mode:
+  # Set Circuit 1 work mode. Values: 0=Off, 1=Day, 2=Night, 3=Scheduled
+  url: "http://HUB_IP/econet/newParam?newParamName=236&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_c1_comfort_temp:
+  # Set Circuit 1 day/comfort thermostat target. Range: 10–35°C
+  url: "http://HUB_IP/econet/newParam?newParamName=238&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_c1_eco_temp:
+  # Set Circuit 1 night/eco thermostat target. Range: 10–35°C
+  url: "http://HUB_IP/econet/newParam?newParamName=239&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+# --- Weather Compensation Controls ---
+
+grant_set_weather_curve:
+  # Set weather compensation curve. Range: 0.0–4.0
+  url: "http://HUB_IP/econet/newParam?newParamName=273&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_curve_shift:
+  # Set curve shift (parallel shift of heating curve). Range: -20 to +20
+  url: "http://HUB_IP/econet/newParam?newParamName=275&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_base_flow_temp:
+  # Set Circuit 1 base flow temperature. Range: 24–75°C
+  url: "http://HUB_IP/econet/newParam?newParamName=261&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_temp_reduction:
+  # Set Circuit 1 temperature reduction (night setback). Range: 0–20°C
+  url: "http://HUB_IP/econet/newParam?newParamName=262&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_room_temp_correction:
+  # Set Room Temperature Correction multiplier factor. Range: 0.0 to 10.0
+  url: "http://HUB_IP/econet/newParam?newParamName=263&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+# --- Summer Mode Controls ---
+
+grant_set_summer_on:
+  # Temperature above which summer mode activates (heating off). Range: 17–30°C
+  url: "http://HUB_IP/econet/newParam?newParamName=702&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+grant_set_summer_off:
+  # Temperature below which summer mode deactivates (heating resumes). Range: 0–19°C
+  url: "http://HUB_IP/econet/newParam?newParamName=703&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password
+
+
+grant_set_dhw_boost:
+  # Triggers or cancels a single DHW top-up cycle. 1 = Trigger, 0 = Cancel
+  url: "http://HUB_IP/econet/newParam?newParamName=115&newParamValue={{ value }}"
+  method: GET
+  username: !secret econet_username
+  password: !secret econet_password

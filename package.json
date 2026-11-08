@@ -1,0 +1,12 @@
+{
+  "name": "heat-pump-history-card",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Home Assistant card: heat pump history on a zoomable timeline",
+  "type": "module",
+  "scripts": {
+    "test": "TZ=Europe/London node --test test/*.test.mjs",
+    "build": "node tools/build.mjs",
+    "prototype": "node tools/build.mjs && node tools/prototype.mjs dist/prototype.html"
+  }
+}
